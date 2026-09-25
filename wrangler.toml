@@ -1,8 +1,8 @@
-name = "ynf-cell-ppob"
-main = "worker.js"
-compatibility_date = "2026-09-25"
-workers_dev = true
+name = "sel-ynf-ppob"
+main = "pekerja.js"
+compatibility_date = "2024-01-01"
 
-[assets]
-directory = "./public"
-binding = "ASSETS"
+[[d1_databases]]
+binding = "DB"
+database_name = "sel-ynf-ppob-db"
+database_id = "2066f9df-73db-480d-91ab-9549436185a7"
