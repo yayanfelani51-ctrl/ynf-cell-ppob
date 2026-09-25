@@ -6,5 +6,7 @@ compatibility_date = "2024-01-01"
 binding = "DB"
 database_name = "sel-ynf-ppob-db"
 database_id = "2066f9df-73db-480d-91ab-9549436185a7"
+
 [assets]
 directory = "."
+
