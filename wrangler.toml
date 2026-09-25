@@ -1,0 +1,8 @@
+name = "ynf-cell-ppob"
+main = "worker.js"
+compatibility_date = "2026-09-25"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
