@@ -54,31 +54,45 @@ export default { async fetch(req, env) {
     
     // API SIMPAN TRANSAKSI
     if(path==='/api/transaksi' && req.method==='POST'){
-      const b=await req.json(); 
-      const harga=Number(b.harga); 
+      let b = {};
+      try { b = await req.json(); } catch(e){}
       
-      const tglPilihan = parseDate(b.tanggal);
-      const jatuhTempoPilihan = parseDate(b.jatuh_tempo);
+      const harga = Number(b.harga) || 0;
+      const produk = String(b.produk || 'Pulsa').trim();
+      const nama = String(b.nama || 'Pelanggan').trim();
+      const nomor = String(b.nomor || '-').trim();
+      const status_pembayaran = ['LUNAS', 'HUTANG'].includes(b.status_pembayaran) ? b.status_pembayaran : 'LUNAS';
+      
+      // Auto-generate nomor transaksi unik agar tidak pernah error duplikat
+      const no_transaksi = 'TRX-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+      
+      const nowStr = new Date().toISOString().split('T')[0];
+      const tglPilihan = parseDate(b.tanggal) || nowStr;
+      const jatuhTempoPilihan = parseDate(b.jatuh_tempo) || (status_pembayaran === 'HUTANG' ? nowStr : null);
 
-      if(!b.no_transaksi||!tglPilihan||!b.produk||!b.nama||!b.nomor||isNaN(harga)||harga<=0) {
-        return json({ok:false, message:'Data transaksi tidak lengkap atau format tanggal salah.'}, 400, headers());
-      }
-      if(!['LUNAS', 'HUTANG'].includes(b.status_pembayaran)) {
-        return json({ok:false, message:'Status pembayaran tidak valid.'}, 400, headers());
-      }
-      if(b.status_pembayaran==='HUTANG' && !jatuhTempoPilihan) {
-        return json({ok:false, message:'Tanggal jatuh tempo wajib diisi.'}, 400, headers());
-      }
-
-      try{ 
-        const r=await env.DB.prepare('INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran, jatuh_tempo, ditagihkan_ke) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').bind(b.no_transaksi, tglPilihan, b.produk, b.nama, b.nomor, b.paket||'', harga, b.status_pembayaran, b.status_pembayaran==='HUTANG'?jatuhTempoPilihan:null, b.ditagihkan_ke||'').run(); 
-        return json({ok:true, id:r.meta.last_row_id}, 201, headers()); 
-      }catch(e){ 
-        return json({ok:false, message:'Gagal menyimpan transaksi: '+e.message}, 400, headers()); 
+      try { 
+        const r = await env.DB.prepare(
+          'INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran, jatuh_tempo, ditagihkan_ke) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(
+          no_transaksi, 
+          tglPilihan, 
+          produk, 
+          nama, 
+          nomor, 
+          b.paket || '', 
+          harga, 
+          status_pembayaran, 
+          jatuhTempoPilihan, 
+          b.ditagihkan_ke || ''
+        ).run(); 
+        
+        return json({ok:true, id:r.meta.last_row_id, no_transaksi}, 201, headers()); 
+      } catch(e) { 
+        return json({ok:false, message:'Gagal menyimpan transaksi: ' + e.message}, 400, headers()); 
       }
     }
     
-    // API AMBIL DATA REKAP TRANSAKSI
+    // API GET REKAP TRANSAKSI
     if(path==='/api/transaksi' && req.method==='GET'){
       const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
       return json({ok:true, data: rows.results||[]}, 200, headers());
@@ -99,7 +113,6 @@ export default { async fetch(req, env) {
         });
       </script>` : '';
 
-      // Script Komponen Rekap Transaksi 1 Halaman
       const rekapScript = `
         <div id="rekapContainer" style="margin:20px 10px; padding:15px; background:#1e1e1e; color:#fff; border-radius:10px;">
           <h3 style="color:#f39c12; margin-top:0;">📋 Rekap Transaksi Terakhir</h3>
