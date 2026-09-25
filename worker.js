@@ -47,7 +47,15 @@ export default { async fetch(req, env) {
     }
 
     // Mengarahkan alamat utama (/) langsung ke file /admin/index.html
-    const assetPath = (path === '/' || path === '/admin' || path === '/admin/') ? '/admin/index.html' : path;
-    return env.ASSETS.fetch(new Request(new URL(assetPath, url.origin)));
+    const assetPath = (path === '/' || path === '/admin' || path === '/admin/') ? '/index.html' : path;
+const res = await env.ASSETS.fetch(new Request(new URL(assetPath, url.origin)));
+if (path === '/' || path === '/index.html') {
+  let html = await res.text();
+  const pwaTags = `<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#121212"><meta name="mobile-web-app-capable" content="yes">`;
+  html = html.replace('</head>', `${pwaTags}</head>`);
+  return new Response(html, { headers: res.headers });
+}
+return res;
+
   }catch(e){console.error(e); return json({ok:false, message:'Server error: '+e.message}, 500, headers());}
 }}
