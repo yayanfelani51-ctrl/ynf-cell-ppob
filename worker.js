@@ -5,7 +5,7 @@ function json(data, status=200, extra={}) {
   return new Response(JSON.stringify(data), {status, headers:{'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', ...extra}});
 }
 function text(data, status=200, extra={}){ return new Response(data, {status, headers:{'Content-Type':'text/plain; charset=utf-8', ...extra}}); }
-function validate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(String(v)); }
+function validate(v){ return /^\d{4}-\d{2}-\d{2}$/.test(String(v)) || /^\d{2}\/\d{2}\/\d{4}$/.test(String(v)); }
 function b64u(bytes){ let s=''; for(const b of bytes) s+=String.fromCharCode(b); return btoa(s).replaceAll('+','-').replaceAll('/','_').replaceAll('=',''); }
 function ub64(s){ s=s.replaceAll('-','+').replaceAll('_','/'); while(s.length%4) s+='='; const bin=atob(s); return Uint8Array.from(bin, c=>c.charCodeAt(0)); }
 async function hmac(secret, data){ const k=await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), {name:'HMAC', hash:'SHA-256'}, false, ['sign']); return b64u(new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(data)))); }
