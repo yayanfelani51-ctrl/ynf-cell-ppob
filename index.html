@@ -15,7 +15,7 @@
         .header h1 { font-size: 26px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; }
         .header p { font-size: 12px; color: #aaa; margin-top: 4px; letter-spacing: 1px; }
 
-        .page-nav { display: flex; gap: 10px; margin-bottom: 15px; }
+        .page-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
         .page-nav button { margin-top: 0; }
 
         .card { background: #111111; border: 1px solid #222222; border-radius: 14px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
@@ -31,6 +31,7 @@
         .btn-wa { background: #25D366; color: #ffffff; }
         .btn-wa:hover { background: #1da851; }
         .btn-secondary { background: #2980b9; color: #ffffff; }
+        .btn-danger { background: #e74c3c; color: #ffffff; }
         .btn-success { background: #27ae60; color: #ffffff; }
 
         #alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; font-size: 13px; }
@@ -94,10 +95,25 @@
 
     <div id="alert"></div>
 
-    <!-- HALAMAN FORM TRANSAKSI -->
-    <div id="pageTransaksi">
+    <!-- ================= HALAMAN LOGIN ================= -->
+    <div id="pageLogin">
+        <div class="card" style="max-width: 400px; margin: 0 auto;">
+            <h2>🔒 Masuk Keamanan</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>PIN / Kata Sandi Admin</label>
+                    <input type="password" id="pinInput" placeholder="Masukkan PIN (Default: 123456)" required>
+                </div>
+                <button type="submit" id="btnLogin">🔑 Masuk Aplikasi</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= HALAMAN FORM TRANSAKSI ================= -->
+    <div id="pageTransaksi" style="display:none;">
         <div class="page-nav">
             <button class="btn-secondary" onclick="bukaHalaman('rekap')">📊 Buka Rekapan Transaksi</button>
+            <button class="btn-danger" style="width:auto; padding: 10px 15px;" onclick="logout()">🚪 Logout</button>
         </div>
 
         <div class="card">
@@ -247,10 +263,11 @@
         </div>
     </div>
 
-    <!-- HALAMAN REKAP TRANSAKSI -->
+    <!-- ================= HALAMAN REKAP TRANSAKSI ================= -->
     <div id="pageRekap" style="display:none;">
         <div class="page-nav">
             <button class="btn-secondary" onclick="bukaHalaman('transaksi')">➕ Kembali ke Form Transaksi</button>
+            <button class="btn-danger" style="width:auto; padding: 10px 15px;" onclick="logout()">🚪 Logout</button>
         </div>
 
         <div class="card">
@@ -319,6 +336,57 @@
     let currentLastData = null;
 
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+
+    // CEK SESI LOGIN SAAT PERTAMA DIBUKA
+    window.onload = function() {
+        if (localStorage.getItem('ynf_is_logged') === 'true') {
+            document.getElementById('pageLogin').style.display = 'none';
+            document.getElementById('pageTransaksi').style.display = 'block';
+        }
+    };
+
+    // FUNGSI LOGIN
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pin = document.getElementById('pinInput').value;
+        const btn = document.getElementById('btnLogin');
+        btn.disabled = true;
+        btn.innerText = 'Memeriksa...';
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin })
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.ok) {
+                localStorage.setItem('ynf_is_logged', 'true');
+                document.getElementById('pageLogin').style.display = 'none';
+                document.getElementById('pageTransaksi').style.display = 'block';
+                showAlert('✅ ' + result.message, true);
+            } else {
+                showAlert('❌ ' + (result.message || 'PIN Salah'), false);
+            }
+        } catch (e) {
+            showAlert('❌ ERROR: ' + e.message, false);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = '🔑 Masuk Aplikasi';
+        }
+    });
+
+    // FUNGSI LOGOUT
+    function logout() {
+        localStorage.removeItem('ynf_is_logged');
+        document.getElementById('pageTransaksi').style.display = 'none';
+        document.getElementById('pageRekap').style.display = 'none';
+        document.getElementById('pageLogin').style.display = 'block';
+        document.getElementById('pinInput').value = '';
+        showAlert('🔒 Anda telah keluar.', true);
+    }
 
     function bukaHalaman(hal) {
         if (hal === 'rekap') {
@@ -398,7 +466,6 @@
         }
     }
 
-    // FUNGSI UBAH STATUS HUTANG <-> LUNAS
     async function ubahStatus(id, currentStatus) {
         const statusBaru = currentStatus === 'LUNAS' ? 'HUTANG' : 'LUNAS';
         if (!confirm(`Ubah status transaksi ini menjadi ${statusBaru}?`)) return;
