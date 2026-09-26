@@ -1,112 +1,104 @@
 const SESSION_COOKIE = 'ynf_admin_session';
-const SESSION_TTL = 60 * 60 * 12;
 
-function json(data, status=200, extra={}) {
-  return new Response(JSON.stringify(data), {status, headers:{'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', ...extra}});
-}
-function text(data, status=200, extra={}){ return new Response(data, {status, headers:{'Content-Type':'text/plain; charset=utf-8', ...extra}}); }
-
-function parseDate(v){
-  if(!v) return null;
-  const str = String(v).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
-    const [d, m, y] = str.split('/');
-    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-  return null;
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
 }
 
-export default { async fetch(req, env) {
-  try {
-    if(!env.DB) {
-      return json({ok:false, message:'Database D1 belum terhubung ke Worker. Pastikan Variable Binding di Cloudflare dinamai "DB".'}, 500);
+export default {
+  async fetch(req, env) {
+    if (req.method === 'OPTIONS') {
+      return json({ ok: true });
     }
 
-    // Inisialisasi Tabel Transaksi jika belum ada
-    await env.DB.prepare('CREATE TABLE IF NOT EXISTS transaksi (id INTEGER PRIMARY KEY AUTOINCREMENT, no_transaksi TEXT NOT NULL UNIQUE, tanggal TEXT NOT NULL, produk TEXT NOT NULL, nama TEXT NOT NULL, nomor TEXT NOT NULL, paket TEXT, harga REAL NOT NULL, status_pembayaran TEXT NOT NULL, jatuh_tempo TEXT, ditagihkan_ke TEXT, dibuat_pada TEXT DEFAULT CURRENT_TIMESTAMP)').run();
-
-    const url = new URL(req.url);
-    const path = url.pathname;
-
-    // 1. ENDPOINT SIMPAN TRANSAKSI
-    if(path === '/api/transaksi' && req.method === 'POST') {
-      let b = {};
-      try {
-        b = await req.json();
-      } catch(err) {
-        return json({ok:false, message:'Format data JSON tidak valid'}, 400);
+    try {
+      if (!env.DB) {
+        return json({ ok: false, message: 'Database D1 belum terhubung ke Worker (env.DB tidak ditemukan).' }, 500);
       }
 
-      const rawHarga = String(b.harga || b.total || '0').replace(/[^0-9]/g, '');
-      const harga = Number(rawHarga) || 0;
-      const produk = String(b.produk || b.jenis_produk || 'Pulsa').trim();
-      const nama = String(b.nama || b.nama_pelanggan || 'Pelanggan').trim();
-      const nomor = String(b.nomor || b.nomor_hp || '-').trim();
-      const status_pembayaran = String(b.status_pembayaran || b.status || 'LUNAS').toUpperCase();
-      
-      // Auto-generate nomor transaksi unik agar tidak pernah error duplikat (UNIQUE constraint)
-      const no_transaksi = 'TRX-' + Date.now() + '-' + Math.floor(Math.random()*1000);
-      const nowStr = new Date().toISOString().split('T')[0];
-      const tglPilihan = parseDate(b.tanggal) || nowStr;
-      const jatuhTempoPilihan = parseDate(b.jatuh_tempo) || (status_pembayaran === 'HUTANG' ? nowStr : null);
+      // 1. Buat Tabel jika belum ada
+      await env.DB.prepare(`
+        CREATE TABLE IF NOT EXISTS transaksi (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          no_transaksi TEXT NOT NULL UNIQUE,
+          tanggal TEXT NOT NULL,
+          produk TEXT NOT NULL,
+          nama TEXT NOT NULL,
+          nomor TEXT NOT NULL,
+          paket TEXT,
+          harga REAL NOT NULL,
+          status_pembayaran TEXT NOT NULL,
+          jatuh_tempo TEXT,
+          ditagihkan_ke TEXT,
+          dibuat_pada TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `).run();
 
-      try {
-        const r = await env.DB.prepare(
-          'INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran, jatuh_tempo, ditagihkan_ke) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        ).bind(
-          no_transaksi,
-          tglPilihan,
-          produk,
-          nama,
-          nomor,
-          b.paket || '',
-          harga,
-          status_pembayaran,
-          jatuhTempoPilihan,
-          b.ditagihkan_ke || ''
-        ).run();
+      const url = new URL(req.url);
+      const path = url.pathname;
 
-        return json({ok:true, message:'Transaksi berhasil disimpan', id:r.meta.last_row_id, no_transaksi}, 201);
-      } catch(dbErr) {
-        return json({ok:false, message:'Gagal menyimpan ke DB: ' + dbErr.message}, 500);
+      // 2. ENDPOINT SIMPAN TRANSAKSI (POST)
+      if (path === '/api/transaksi' && req.method === 'POST') {
+        let b;
+        try {
+          b = await req.json();
+        } catch (e) {
+          return json({ ok: false, message: 'Format data JSON dari web tidak valid.' }, 400);
+        }
+
+        const nama = String(b.nama || '').trim();
+        const nomor = String(b.nomor || '').trim();
+        const produk = String(b.produk || 'Pulsa').trim();
+        const paket = String(b.paket || '').trim();
+        const harga = Number(String(b.harga || 0).replace(/[^0-9]/g, '')) || 0;
+        const status_pembayaran = String(b.status_pembayaran || 'LUNAS').toUpperCase();
+        const tanggal = b.tanggal || new Date().toISOString().split('T')[0];
+
+        if (!nama || !nomor || harga <= 0) {
+          return json({ ok: false, message: 'Harap lengkapi Nama, Nomor HP, dan Harga dengan benar.' }, 400);
+        }
+
+        const no_transaksi = 'TRX-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+        const result = await env.DB.prepare(`
+          INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran).run();
+
+        return json({
+          ok: true,
+          message: 'Transaksi berhasil disimpan!',
+          no_transaksi: no_transaksi,
+          id: result.meta.last_row_id
+        }, 201);
       }
+
+      // 3. ENDPOINT AMBIL REKAP (GET)
+      if (path === '/api/transaksi' && req.method === 'GET') {
+        const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
+        const data = rows.results || [];
+
+        const totalOmset = data.reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
+        const totalLunas = data.filter(i => i.status_pembayaran === 'LUNAS').reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
+        const totalHutang = data.filter(i => i.status_pembayaran === 'HUTANG').reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
+
+        return json({
+          ok: true,
+          data: data,
+          ringkasan: { totalOmset, totalLunas, totalHutang }
+        });
+      }
+
+      return env.ASSETS.fetch(req);
+    } catch (err) {
+      return json({ ok: false, message: 'Server Error: ' + err.message }, 500);
     }
-
-    // 2. ENDPOINT AMBIL REKAP TRANSAKSI
-    if(path === '/api/transaksi' && req.method === 'GET') {
-      const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
-      return json({ok:true, data: rows.results || []}, 200);
-    }
-
-    // 3. MENAMPILKAN HALAMAN UTAMA (LANGSUNG KE MENU TRANSAKSI)
-    const assetPath = (path === '/' || path === '/admin' || path === '/admin/') ? '/index.html' : path;
-    const res = await env.ASSETS.fetch(new Request(new URL(assetPath, url.origin)));
-    
-    if (path === '/' || path === '/index.html') {
-      let html = await res.text();
-
-      // Injeksi skrip agar aplikasi langsung fokus ke form input transaksi saat pertama dibuka
-      const directToTxScript = `
-        <script>
-          window.addEventListener('DOMContentLoaded', () => {
-            // Sembunyikan modal login jika ada yang terbuka otomatis
-            const loginModal = document.getElementById('loginModal') || document.querySelector('.modal-login');
-            if (loginModal) loginModal.style.display = 'none';
-            
-            // Fokuskan layar/scroll langsung ke form input transaksi
-            const txForm = document.querySelector('form') || document.getElementById('input-transaksi') || document.querySelector('.card');
-            if (txForm) txForm.scrollIntoView({ behavior: 'smooth' });
-          });
-        </script>
-      `;
-
-      html = html.replace('</body>', `${directToTxScript}</body>`);
-      return new Response(html, { headers: res.headers });
-    }
-
-    return res;
-  } catch(e) {
-    return json({ok:false, message:'Server Error: ' + e.message}, 500);
   }
-}}
+};
