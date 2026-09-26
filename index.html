@@ -3,72 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEL YNF PPOB</title>
+    <title>YNF CELL PPOB</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0a0a0a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
+        body { background: #000000; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
         .container { max-width: 650px; margin: 0 auto; }
 
-        /* HEADER & LOGO */
-        .header { text-align: center; padding: 20px 10px; margin-bottom: 20px; background: linear-gradient(135deg, #1e1e1e, #111); border-radius: 16px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2); }
-        .header img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; border: 2px solid #f39c12; object-fit: cover; }
-        .header h1 { font-size: 24px; color: #f39c12; letter-spacing: 1px; }
-        .header p { font-size: 12px; color: #aaa; margin-top: 4px; }
+        /* HEADER & LOGO UTAMA APLIKASI */
+        .header { text-align: center; padding: 20px 10px; margin-bottom: 20px; background: #0a0a0a; border-radius: 16px; border: 1px solid #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .header img { width: 100px; height: auto; border-radius: 8px; margin-bottom: 8px; }
+        .header h1 { font-size: 26px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; }
+        .header p { font-size: 12px; color: #aaa; margin-top: 4px; letter-spacing: 1px; }
 
-        .card { background: #181818; border: 1px solid #2a2a2a; border-radius: 14px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2, h3 { color: #f39c12; margin-bottom: 12px; font-size: 17px; border-bottom: 1px solid #2a2a2a; padding-bottom: 8px; }
+        /* KARTU FORM */
+        .card { background: #111111; border: 1px solid #222222; border-radius: 14px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        h2, h3 { color: #ffd700; margin-bottom: 12px; font-size: 17px; border-bottom: 1px solid #222222; padding-bottom: 8px; }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; font-weight: 600; }
-        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; font-size: 14px; }
-        input:focus, select:focus { outline: none; border-color: #f39c12; }
+        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333333; background: #1a1a1a; color: #ffffff; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: #ffd700; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { width: 100%; padding: 12px; background: #f39c12; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
-        button:hover { background: #e67e22; }
-        .btn-wa { background: #25D366; color: #fff; }
+        
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #d4af37); border: none; border-radius: 8px; color: #000000; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
+        button:hover { background: #c59b27; }
+        .btn-wa { background: #25D366; color: #ffffff; }
         .btn-wa:hover { background: #1da851; }
-        .btn-secondary { background: #2980b9; color: #fff; }
-        .btn-success { background: #27ae60; color: #fff; }
+        .btn-secondary { background: #2980b9; color: #ffffff; }
+        .btn-success { background: #27ae60; color: #ffffff; }
 
         #alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; font-size: 13px; }
         .alert-success { background: #1e824c; color: white; }
         .alert-danger { background: #96281b; color: white; }
 
-        /* SUMMARY BOX */
+        /* RINGKASAN REKAP */
         .summary-box { display: flex; gap: 8px; margin-bottom: 15px; }
-        .summary-card { flex: 1; background: #222; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .summary-card { flex: 1; background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
         .summary-card small { color: #aaa; font-size: 10px; }
         .summary-card h4 { margin-top: 4px; font-size: 13px; font-weight: bold; }
 
-        /* TABEL REKAP */
+        /* TABEL DATA */
         table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { padding: 8px; border-bottom: 1px solid #2a2a2a; text-align: left; }
-        th { color: #aaa; background: #202020; }
+        th, td { padding: 8px; border-bottom: 1px solid #222222; text-align: left; }
+        th { color: #aaa; background: #181818; }
         .badge-lunas { background: #27ae60; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
         .badge-hutang { background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
 
-        /* STRUK / NOTA */
-        #notaPreview { background: #ffffff; color: #000000; padding: 20px; border-radius: 10px; max-width: 320px; margin: 15px auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-        .nota-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
-        .nota-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .nota-footer { text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; font-size: 10px; }
+        /* DESIGN BINGKAI NOTA ELEGAN HITAM-EMAS */
+        #notaContainer { display: flex; justify-content: center; margin-bottom: 15px; }
+        #notaPreview {
+            background-color: #050505;
+            color: #ffffff;
+            width: 320px;
+            padding: 24px 20px;
+            border-radius: 18px;
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            position: relative;
+        }
+        .n-logo-box { text-align: center; margin-bottom: 10px; }
+        .n-logo-box img { width: 90px; height: auto; }
+
+        .n-title-box { margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px; text-align: center; }
+        .n-brand { font-size: 22px; font-weight: 800; color: #ffd700; letter-spacing: 1px; }
+        .n-subtitle { font-size: 11px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; }
+
+        .n-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
+        .n-label { color: #aaaaaa; font-weight: 400; width: 40%; }
+        .n-val { color: #ffffff; font-weight: 700; text-align: right; width: 60%; word-break: break-word; }
+        .n-val-gold { color: #ffd700; font-weight: 700; text-align: right; }
+
+        .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.2); margin: 12px 0; }
+
+        .n-status-box { text-align: center; margin: 18px 0 12px 0; }
+        .n-status-text { font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+        .n-status-hutang { color: #f39c12; }
+        .n-status-lunas { color: #27ae60; }
+
+        .n-footer { text-align: center; color: #888888; font-size: 11px; margin-top: 15px; line-height: 1.4; }
+        .n-footer b { color: #ffffff; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- HEADER & LOGO APLIKASI -->
+    <!-- HEADER LOGO UTAMA APLIKASI -->
     <div class="header">
-        <img src="https://via.placeholder.com/150/f39c12/000000?text=YNF+CELL" alt="Logo YNF CELL" id="appLogo">
-        <h1>SEL YNF PPOB</h1>
-        <p>Sistem Layanan Transaksi & Kasir PPOB Terpadu</p>
+        <img src="https://lh3.googleusercontent.com/d/1-X12w_JFU_wvwY2_gefrD3U-D9t3vW3P" alt="Logo YNF CELL">
+        <h1>YNF CELL</h1>
+        <p>PPOB CENTER</p>
     </div>
 
     <div id="alert"></div>
 
     <!-- FORM INPUT TRANSAKSI -->
     <div class="card">
-        <h2>📱 Input Transaksi Baru</h2>
+        <h2>📱 Input Transaksi PPOB</h2>
         <form id="txForm">
             <div class="grid-2">
                 <div class="form-group">
@@ -84,11 +115,11 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Nama Pelanggan</label>
-                    <input type="text" id="nama" placeholder="Contoh: Budi" required>
+                    <input type="text" id="nama" placeholder="Contoh: Lukman Bogel" required>
                 </div>
                 <div class="form-group">
                     <label>Nomor HP / ID Tujuan</label>
-                    <input type="text" id="nomor" placeholder="081234567890" required>
+                    <input type="text" id="nomor" placeholder="085695019006" required>
                 </div>
             </div>
 
@@ -105,19 +136,19 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Rincian Paket / Nominal</label>
-                    <input type="text" id="paket" placeholder="Contoh: Telkomsel 10GB">
+                    <label>Paket / Nominal</label>
+                    <input type="text" id="paket" placeholder="Contoh: Pulsa 40">
                 </div>
             </div>
 
             <div class="grid-2">
                 <div class="form-group">
                     <label>Harga Modal (Rp)</label>
-                    <input type="number" id="harga_modal" placeholder="20000">
+                    <input type="number" id="harga_modal" placeholder="40000">
                 </div>
                 <div class="form-group">
                     <label>Harga Jual / Tagihan (Rp)</label>
-                    <input type="number" id="harga" placeholder="25000" required oninput="hitungKembalian()">
+                    <input type="number" id="harga" placeholder="43000" required oninput="hitungKembalian()">
                 </div>
             </div>
 
@@ -144,41 +175,84 @@
         </form>
     </div>
 
-    <!-- PREVIEW NOTA BUKTI TRANSAKSI -->
+    <!-- NOTA HITAM ELEGAN BERBINGKAI EMAS WITH LOGO -->
     <div class="card" id="notaCard" style="display:none;">
         <h2>📄 Preview Nota Transaksi</h2>
-        <div id="notaPreview">
-            <div class="nota-header">
-                <b>SEL YNF PPOB</b><br>
-                <small>Struk Bukti Pembayaran</small>
-            </div>
-            <div class="nota-line"><span>No Trx:</span><span id="n_trx">-</span></div>
-            <div class="nota-line"><span>Tgl:</span><span id="n_tgl">-</span></div>
-            <div class="nota-line"><span>Pelanggan:</span><span id="n_nama">-</span></div>
-            <div class="nota-line"><span>No Tujuan:</span><span id="n_nomor">-</span></div>
-            <div class="nota-line"><span>Produk:</span><span id="n_produk">-</span></div>
-            <div class="nota-line" id="n_row_jt" style="display:none;"><span>Jatuh Tempo:</span><span id="n_jt">-</span></div>
-            <hr style="border:none; border-top:1px dashed #000; margin:6px 0;">
-            <div class="nota-line"><span>Total Tagihan:</span><b id="n_harga">Rp 0</b></div>
-            <div class="nota-line"><span>Status:</span><b id="n_status">LUNAS</b></div>
-            <div class="nota-footer">
-                <p>Terima kasih atas kunjungan Anda!</p>
+        <div id="notaContainer">
+            <div id="notaPreview">
+                <!-- LOGO GAMBAR UTAMA -->
+                <div class="n-logo-box">
+                    <img src="https://lh3.googleusercontent.com/d/1-X12w_JFU_wvwY2_gefrD3U-D9t3vW3P" alt="Logo YNF CELL">
+                </div>
+
+                <div class="n-title-box">
+                    <div class="n-brand">YNF CELL</div>
+                    <div class="n-subtitle">PPOB CENTER</div>
+                </div>
+
+                <div class="n-row">
+                    <div class="n-label">No. Transaksi</div>
+                    <div class="n-val" id="n_trx">YNF-20260926-001005302-KDIX</div>
+                </div>
+                <div class="n-row">
+                    <div class="n-label">Tanggal</div>
+                    <div class="n-val" id="n_tgl">26/09/2026, 00.10.05</div>
+                </div>
+
+                <div class="n-divider"></div>
+
+                <div class="n-row">
+                    <div class="n-label">Produk</div>
+                    <div class="n-val" id="n_produk">Pulsa</div>
+                </div>
+                <div class="n-row">
+                    <div class="n-label">Nama</div>
+                    <div class="n-val" id="n_nama">Lukman Bogel</div>
+                </div>
+                <div class="n-row">
+                    <div class="n-label">Nomor / ID</div>
+                    <div class="n-val" id="n_nomor">085695019006</div>
+                </div>
+                <div class="n-row">
+                    <div class="n-label">Paket / Nominal</div>
+                    <div class="n-val" id="n_paket">Pulsa 40</div>
+                </div>
+                <div class="n-row">
+                    <div class="n-label">Harga</div>
+                    <div class="n-val" id="n_harga">Rp 43.000</div>
+                </div>
+                <div class="n-row" id="n_row_jt">
+                    <div class="n-label">Jatuh Tempo</div>
+                    <div class="n-val-gold" id="n_jt">02-10-2026</div>
+                </div>
+
+                <div class="n-divider"></div>
+
+                <div class="n-status-box">
+                    <div class="n-status-text" id="n_status_box">⚠️ HUTANG</div>
+                </div>
+
+                <div class="n-divider"></div>
+
+                <div class="n-footer">
+                    Terima kasih telah bertransaksi<br>di <b>YNF CELL</b>
+                </div>
             </div>
         </div>
         
         <div class="grid-2">
             <button class="btn-success" onclick="downloadNotaPNG()">📥 Unduh Nota PNG</button>
-            <button class="btn-wa" onclick="kirimNotaWA()">💬 Kirim Nota ke WhatsApp</button>
+            <button class="btn-wa" onclick="kirimNotaWA()">💬 Kirim ke WhatsApp</button>
         </div>
     </div>
 
-    <!-- RINGKASAN & FILTER REKAP -->
+    <!-- RINGKASAN PENJUALAN & FILTER -->
     <div class="card">
         <h2>📊 Ringkasan Penjualan & Filter</h2>
         <div class="summary-box">
             <div class="summary-card">
                 <small>Total Omset</small>
-                <h4 id="sumOmset" style="color: #f39c12;">Rp 0</h4>
+                <h4 id="sumOmset" style="color: #ffd700;">Rp 0</h4>
             </div>
             <div class="summary-card">
                 <small>Lunas</small>
@@ -211,7 +285,7 @@
         <button class="btn-secondary" onclick="loadRekap()">🔍 Cari Rekap</button>
     </div>
 
-    <!-- TABEL DATA REKAP TRANSAKSI -->
+    <!-- TABEL DATA REKAP -->
     <div class="card">
         <h2>📋 Daftar Rekap Transaksi</h2>
         <div style="overflow-x:auto;">
@@ -252,6 +326,13 @@
         const bayar = Number(document.getElementById('uang_bayar').value) || 0;
         const kembalian = bayar - harga;
         document.getElementById('kembalian').value = bayar > 0 ? (kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID')) : '';
+    }
+
+    function formatTanggalIndo(tglStr) {
+        if(!tglStr) return '-';
+        const parts = tglStr.split('-');
+        if(parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        return tglStr;
     }
 
     async function loadRekap() {
@@ -301,6 +382,9 @@
         btn.disabled = true;
         btn.innerText = 'Menyimpan...';
 
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '.');
+
         const payload = {
             tanggal: document.getElementById('tanggal').value,
             jatuh_tempo: document.getElementById('jatuh_tempo').value,
@@ -325,28 +409,37 @@
             if (res.ok && result.ok) {
                 showAlert('✅ Transaksi Berhasil Disimpan!', true);
                 
-                // Simpan variabel untuk WhatsApp
-                currentLastData = { ...payload, no_transaksi: result.no_transaksi };
+                const customNoTrx = result.no_transaksi || ('YNF-' + payload.tanggal.replace(/-/g,'') + '-' + Math.floor(10000000 + Math.random() * 90000000));
+                currentLastData = { ...payload, no_transaksi: customNoTrx };
 
-                // Tampilkan Preview Nota
-                document.getElementById('n_trx').innerText = result.no_transaksi || '-';
-                document.getElementById('n_tgl').innerText = payload.tanggal;
+                document.getElementById('n_trx').innerText = customNoTrx;
+                document.getElementById('n_tgl').innerText = formatTanggalIndo(payload.tanggal) + ', ' + timeStr;
+                document.getElementById('n_produk').innerText = payload.produk;
                 document.getElementById('n_nama').innerText = payload.nama;
                 document.getElementById('n_nomor').innerText = payload.nomor;
-                document.getElementById('n_produk').innerText = payload.produk + (payload.paket ? ' ('+payload.paket+')' : '');
+                document.getElementById('n_paket').innerText = payload.paket || '-';
                 document.getElementById('n_harga').innerText = 'Rp ' + Number(payload.harga).toLocaleString('id-ID');
-                document.getElementById('n_status').innerText = payload.status_pembayaran;
 
-                if(payload.status_pembayaran === 'HUTANG' && payload.jatuh_tempo) {
-                    document.getElementById('n_jt').innerText = payload.jatuh_tempo;
-                    document.getElementById('n_row_jt').style.display = 'flex';
+                const statusBox = document.getElementById('n_status_box');
+                const rowJt = document.getElementById('n_row_jt');
+
+                if (payload.status_pembayaran === 'HUTANG') {
+                    statusBox.innerText = '⚠️ HUTANG';
+                    statusBox.className = 'n-status-text n-status-hutang';
+                    if(payload.jatuh_tempo) {
+                        document.getElementById('n_jt').innerText = formatTanggalIndo(payload.jatuh_tempo);
+                        rowJt.style.display = 'flex';
+                    } else {
+                        rowJt.style.display = 'none';
+                    }
                 } else {
-                    document.getElementById('n_row_jt').style.display = 'none';
+                    statusBox.innerText = '✅ LUNAS';
+                    statusBox.className = 'n-status-text n-status-lunas';
+                    rowJt.style.display = 'none';
                 }
 
                 document.getElementById('notaCard').style.display = 'block';
 
-                // Reset Form
                 document.getElementById('nama').value = '';
                 document.getElementById('nomor').value = '';
                 document.getElementById('paket').value = '';
@@ -369,10 +462,14 @@
     });
 
     function downloadNotaPNG() {
-        html2canvas(document.getElementById('notaPreview')).then(canvas => {
+        html2canvas(document.getElementById('notaPreview'), {
+            backgroundColor: '#050505',
+            useCORS: true,
+            scale: 2
+        }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'PPOB') + '.png';
-            link.href = canvas.toDataURL();
+            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'YNF-CELL') + '.png';
+            link.href = canvas.toDataURL('image/png');
             link.click();
         });
     }
@@ -382,22 +479,24 @@
         let noHp = currentLastData.nomor.replace(/[^0-9]/g, '');
         if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1);
 
-        let teks = `*STRUK BUKTI TRANSAKSI - SEL YNF PPOB*\n` +
+        let teks = `*YNF CELL - PPOB CENTER*\n` +
                    `------------------------------------------\n` +
                    `No Trx: ${currentLastData.no_transaksi}\n` +
-                   `Tanggal: ${currentLastData.tanggal}\n` +
-                   `Pelanggan: ${currentLastData.nama}\n` +
-                   `Nomor Tujuan: ${currentLastData.nomor}\n` +
-                   `Produk: ${currentLastData.produk} ${currentLastData.paket ? '('+currentLastData.paket+')' : ''}\n` +
-                   `Total Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
-                   `Status Pembayaran: *${currentLastData.status_pembayaran}*\n`;
+                   `Tanggal: ${formatTanggalIndo(currentLastData.tanggal)}\n` +
+                   `------------------------------------------\n` +
+                   `Produk: ${currentLastData.produk}\n` +
+                   `Nama: ${currentLastData.nama}\n` +
+                   `Nomor / ID: ${currentLastData.nomor}\n` +
+                   `Paket / Nominal: ${currentLastData.paket || '-'}\n` +
+                   `Harga: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n`;
                    
         if (currentLastData.status_pembayaran === 'HUTANG' && currentLastData.jatuh_tempo) {
-            teks += `Jatuh Tempo: ${currentLastData.jatuh_tempo}\n`;
+            teks += `Jatuh Tempo: ${formatTanggalIndo(currentLastData.jatuh_tempo)}\n`;
         }
 
         teks += `------------------------------------------\n` +
-                `Terima kasih telah bertransaksi di SEL YNF PPOB!`;
+                `Status: *${currentLastData.status_pembayaran === 'HUTANG' ? '⚠️ HUTANG' : '✅ LUNAS'}*\n\n` +
+                `Terima kasih telah bertransaksi di *YNF CELL*`;
 
         const waUrl = `https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`;
         window.open(waUrl, '_blank');
