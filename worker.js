@@ -1,12 +1,10 @@
-const SESSION_COOKIE = 'ynf_admin_session';
-
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }
   });
@@ -20,10 +18,9 @@ export default {
 
     try {
       if (!env.DB) {
-        return json({ ok: false, message: 'Database D1 belum terhubung ke Worker (env.DB tidak ditemukan).' }, 500);
+        return json({ ok: false, message: 'Database D1 belum terhubung.' }, 500);
       }
 
-      // 1. Buat Tabel jika belum ada
       await env.DB.prepare(`
         CREATE TABLE IF NOT EXISTS transaksi (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,9 +31,9 @@ export default {
           nomor TEXT NOT NULL,
           paket TEXT,
           harga REAL NOT NULL,
+          harga_modal REAL DEFAULT 0,
           status_pembayaran TEXT NOT NULL,
           jatuh_tempo TEXT,
-          ditagihkan_ke TEXT,
           dibuat_pada TEXT DEFAULT CURRENT_TIMESTAMP
         )
       `).run();
@@ -44,33 +41,47 @@ export default {
       const url = new URL(req.url);
       const path = url.pathname;
 
+      // 1. ENDPOINT UBAH STATUS (PUT)
+      if (path === '/api/transaksi/status' && req.method === 'PUT') {
+        const b = await req.json();
+        const id = b.id;
+        const status = String(b.status_pembayaran || 'LUNAS').toUpperCase();
+
+        if (!id) {
+          return json({ ok: false, message: 'ID Transaksi wajib diisi.' }, 400);
+        }
+
+        await env.DB.prepare(`
+          UPDATE transaksi SET status_pembayaran = ? WHERE id = ?
+        `).bind(status, id).run();
+
+        return json({ ok: true, message: 'Status pembayaran berhasil diperbarui!' });
+      }
+
       // 2. ENDPOINT SIMPAN TRANSAKSI (POST)
       if (path === '/api/transaksi' && req.method === 'POST') {
-        let b;
-        try {
-          b = await req.json();
-        } catch (e) {
-          return json({ ok: false, message: 'Format data JSON dari web tidak valid.' }, 400);
-        }
+        let b = await req.json();
 
         const nama = String(b.nama || '').trim();
         const nomor = String(b.nomor || '').trim();
         const produk = String(b.produk || 'Pulsa').trim();
         const paket = String(b.paket || '').trim();
         const harga = Number(String(b.harga || 0).replace(/[^0-9]/g, '')) || 0;
+        const harga_modal = Number(String(b.harga_modal || 0).replace(/[^0-9]/g, '')) || 0;
         const status_pembayaran = String(b.status_pembayaran || 'LUNAS').toUpperCase();
         const tanggal = b.tanggal || new Date().toISOString().split('T')[0];
+        const jatuh_tempo = b.jatuh_tempo || '';
 
         if (!nama || !nomor || harga <= 0) {
-          return json({ ok: false, message: 'Harap lengkapi Nama, Nomor HP, dan Harga dengan benar.' }, 400);
+          return json({ ok: false, message: 'Harap lengkapi data dengan benar.' }, 400);
         }
 
-        const no_transaksi = 'TRX-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+        const no_transaksi = 'YNF-' + tanggal.replace(/-/g, '') + '-' + Math.floor(10000000 + Math.random() * 90000000);
 
         const result = await env.DB.prepare(`
-          INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(no_transaksi, tanggal, produk, nama, nomor, paket, harga, status_pembayaran).run();
+          INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, harga_modal, status_pembayaran, jatuh_tempo)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(no_transaksi, tanggal, produk, nama, nomor, paket, harga, harga_modal, status_pembayaran, jatuh_tempo).run();
 
         return json({
           ok: true,
