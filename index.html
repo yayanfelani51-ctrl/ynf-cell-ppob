@@ -3,62 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YNF CELL PPOB</title>
+    <title>SEL YNF PPOB</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: sans-serif; }
-        body { background: #121212; color: #fff; margin: 0; padding: 15px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
-        h2, h3 { margin-top: 0; color: #f39c12; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0a0a0a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
+        .container { max-width: 650px; margin: 0 auto; }
+
+        /* HEADER & LOGO */
+        .header { text-align: center; padding: 20px 10px; margin-bottom: 20px; background: linear-gradient(135deg, #1e1e1e, #111); border-radius: 16px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2); }
+        .header img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; border: 2px solid #f39c12; object-fit: cover; }
+        .header h1 { font-size: 24px; color: #f39c12; letter-spacing: 1px; }
+        .header p { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+        .card { background: #181818; border: 1px solid #2a2a2a; border-radius: 14px; padding: 18px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2, h3 { color: #f39c12; margin-bottom: 12px; font-size: 17px; border-bottom: 1px solid #2a2a2a; padding-bottom: 8px; }
         .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-size: 13px; color: #ccc; }
-        input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: #fff; font-size: 14px; }
-        button { width: 100%; padding: 12px; background: #f39c12; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; color: #000; }
-        #alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; display: none; font-weight: bold; text-align: center; }
-        .success { background: #27ae60; color: #fff; }
-        .danger { background: #e74c3c; color: #fff; }
+        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; font-weight: 600; }
+        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; font-size: 14px; }
+        input:focus, select:focus { outline: none; border-color: #f39c12; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { width: 100%; padding: 12px; background: #f39c12; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; }
+        button:hover { background: #e67e22; }
+        .btn-wa { background: #25D366; color: #fff; }
+        .btn-wa:hover { background: #1da851; }
+        .btn-secondary { background: #2980b9; color: #fff; }
+        .btn-success { background: #27ae60; color: #fff; }
+
+        #alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; font-size: 13px; }
+        .alert-success { background: #1e824c; color: white; }
+        .alert-danger { background: #96281b; color: white; }
+
+        /* SUMMARY BOX */
+        .summary-box { display: flex; gap: 8px; margin-bottom: 15px; }
+        .summary-card { flex: 1; background: #222; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .summary-card small { color: #aaa; font-size: 10px; }
+        .summary-card h4 { margin-top: 4px; font-size: 13px; font-weight: bold; }
+
+        /* TABEL REKAP */
         table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { padding: 8px; border-bottom: 1px solid #333; text-align: left; }
-        th { background: #252525; color: #aaa; }
+        th, td { padding: 8px; border-bottom: 1px solid #2a2a2a; text-align: left; }
+        th { color: #aaa; background: #202020; }
+        .badge-lunas { background: #27ae60; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+        .badge-hutang { background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+
+        /* STRUK / NOTA */
+        #notaPreview { background: #ffffff; color: #000000; padding: 20px; border-radius: 10px; max-width: 320px; margin: 15px auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .nota-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+        .nota-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .nota-footer { text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; font-size: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- HEADER & LOGO APLIKASI -->
+    <div class="header">
+        <img src="https://via.placeholder.com/150/f39c12/000000?text=YNF+CELL" alt="Logo YNF CELL" id="appLogo">
+        <h1>SEL YNF PPOB</h1>
+        <p>Sistem Layanan Transaksi & Kasir PPOB Terpadu</p>
+    </div>
+
     <div id="alert"></div>
 
+    <!-- FORM INPUT TRANSAKSI -->
     <div class="card">
-        <h2>📱 Input Transaksi</h2>
+        <h2>📱 Input Transaksi Baru</h2>
         <form id="txForm">
-            <div class="form-group">
-                <label>Tanggal</label>
-                <input type="date" id="tanggal" required>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Tanggal Transaksi</label>
+                    <input type="date" id="tanggal" required>
+                </div>
+                <div class="form-group">
+                    <label>Jatuh Tempo (Jika Hutang)</label>
+                    <input type="date" id="jatuh_tempo">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Nama Pelanggan</label>
-                <input type="text" id="nama" placeholder="Contoh: Budi" required>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nama Pelanggan</label>
+                    <input type="text" id="nama" placeholder="Contoh: Budi" required>
+                </div>
+                <div class="form-group">
+                    <label>Nomor HP / ID Tujuan</label>
+                    <input type="text" id="nomor" placeholder="081234567890" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Nomor HP / Tujuan</label>
-                <input type="text" id="nomor" placeholder="Contoh: 081234567890" required>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Jenis Produk</label>
+                    <select id="produk">
+                        <option value="Pulsa">Pulsa</option>
+                        <option value="Paket Data">Paket Data</option>
+                        <option value="Token PLN">Token PLN</option>
+                        <option value="Voucher Game">Voucher Game</option>
+                        <option value="E-Money">E-Money</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Rincian Paket / Nominal</label>
+                    <input type="text" id="paket" placeholder="Contoh: Telkomsel 10GB">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Produk</label>
-                <select id="produk">
-                    <option value="Pulsa">Pulsa</option>
-                    <option value="Paket Data">Paket Data</option>
-                    <option value="Token PLN">Token PLN</option>
-                    <option value="Voucher Game">Voucher Game</option>
-                </select>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Harga Modal (Rp)</label>
+                    <input type="number" id="harga_modal" placeholder="20000">
+                </div>
+                <div class="form-group">
+                    <label>Harga Jual / Tagihan (Rp)</label>
+                    <input type="number" id="harga" placeholder="25000" required oninput="hitungKembalian()">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Rincian Paket</label>
-                <input type="text" id="paket" placeholder="Contoh: 10 GB / 20k Token">
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Uang Dibayar (Rp)</label>
+                    <input type="number" id="uang_bayar" placeholder="50000" oninput="hitungKembalian()">
+                </div>
+                <div class="form-group">
+                    <label>Kembalian (Rp)</label>
+                    <input type="text" id="kembalian" readonly placeholder="0">
+                </div>
             </div>
-            <div class="form-group">
-                <label>Harga (Rp)</label>
-                <input type="number" id="harga" placeholder="25000" required>
-            </div>
+
             <div class="form-group">
                 <label>Status Pembayaran</label>
                 <select id="status_pembayaran">
@@ -66,16 +139,86 @@
                     <option value="HUTANG">HUTANG</option>
                 </select>
             </div>
-            <button type="submit" id="btnSimpan">Simpan Transaksi</button>
+
+            <button type="submit" id="btnSimpan">💾 Simpan Transaksi & Buat Nota</button>
         </form>
     </div>
 
+    <!-- PREVIEW NOTA BUKTI TRANSAKSI -->
+    <div class="card" id="notaCard" style="display:none;">
+        <h2>📄 Preview Nota Transaksi</h2>
+        <div id="notaPreview">
+            <div class="nota-header">
+                <b>SEL YNF PPOB</b><br>
+                <small>Struk Bukti Pembayaran</small>
+            </div>
+            <div class="nota-line"><span>No Trx:</span><span id="n_trx">-</span></div>
+            <div class="nota-line"><span>Tgl:</span><span id="n_tgl">-</span></div>
+            <div class="nota-line"><span>Pelanggan:</span><span id="n_nama">-</span></div>
+            <div class="nota-line"><span>No Tujuan:</span><span id="n_nomor">-</span></div>
+            <div class="nota-line"><span>Produk:</span><span id="n_produk">-</span></div>
+            <div class="nota-line" id="n_row_jt" style="display:none;"><span>Jatuh Tempo:</span><span id="n_jt">-</span></div>
+            <hr style="border:none; border-top:1px dashed #000; margin:6px 0;">
+            <div class="nota-line"><span>Total Tagihan:</span><b id="n_harga">Rp 0</b></div>
+            <div class="nota-line"><span>Status:</span><b id="n_status">LUNAS</b></div>
+            <div class="nota-footer">
+                <p>Terima kasih atas kunjungan Anda!</p>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <button class="btn-success" onclick="downloadNotaPNG()">📥 Unduh Nota PNG</button>
+            <button class="btn-wa" onclick="kirimNotaWA()">💬 Kirim Nota ke WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- RINGKASAN & FILTER REKAP -->
     <div class="card">
-        <h3>📋 Rekap Transaksi Terbaru</h3>
+        <h2>📊 Ringkasan Penjualan & Filter</h2>
+        <div class="summary-box">
+            <div class="summary-card">
+                <small>Total Omset</small>
+                <h4 id="sumOmset" style="color: #f39c12;">Rp 0</h4>
+            </div>
+            <div class="summary-card">
+                <small>Lunas</small>
+                <h4 id="sumLunas" style="color: #27ae60;">Rp 0</h4>
+            </div>
+            <div class="summary-card">
+                <small>Hutang</small>
+                <h4 id="sumHutang" style="color: #e74c3c;">Rp 0</h4>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Dari Tanggal</label>
+                <input type="date" id="filterMulai">
+            </div>
+            <div class="form-group">
+                <label>Sampai Tanggal</label>
+                <input type="date" id="filterSelesai">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Filter Status</label>
+            <select id="filterStatus">
+                <option value="SEMUA">Semua Status</option>
+                <option value="LUNAS">LUNAS</option>
+                <option value="HUTANG">HUTANG</option>
+            </select>
+        </div>
+        <button class="btn-secondary" onclick="loadRekap()">🔍 Cari Rekap</button>
+    </div>
+
+    <!-- TABEL DATA REKAP TRANSAKSI -->
+    <div class="card">
+        <h2>📋 Daftar Rekap Transaksi</h2>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
                     <tr>
+                        <th>No Trx</th>
                         <th>Tanggal</th>
                         <th>Pelanggan</th>
                         <th>Produk</th>
@@ -83,8 +226,8 @@
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="rekapTable">
-                    <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                <tbody id="rekapTableBody">
+                    <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -92,34 +235,60 @@
 </div>
 
 <script>
+    let currentLastData = null;
+
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
-    function showAlert(text, isOk) {
+    function showAlert(text, isSuccess) {
         const a = document.getElementById('alert');
         a.innerText = text;
-        a.className = isOk ? 'success' : 'danger';
+        a.className = isSuccess ? 'alert-success' : 'alert-danger';
         a.style.display = 'block';
-        setTimeout(() => { a.style.display = 'none'; }, 5000);
+        setTimeout(() => { a.style.display = 'none'; }, 4000);
+    }
+
+    function hitungKembalian() {
+        const harga = Number(document.getElementById('harga').value) || 0;
+        const bayar = Number(document.getElementById('uang_bayar').value) || 0;
+        const kembalian = bayar - harga;
+        document.getElementById('kembalian').value = bayar > 0 ? (kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID')) : '';
     }
 
     async function loadRekap() {
-        try {
-            const res = await fetch('/api/transaksi');
-            const data = await res.json();
-            const tbody = document.getElementById('rekapTable');
+        const mulai = document.getElementById('filterMulai').value;
+        const selesai = document.getElementById('filterSelesai').value;
+        const status = document.getElementById('filterStatus').value;
 
-            if (data.ok && data.data.length > 0) {
-                tbody.innerHTML = data.data.map(i => `
-                    <tr>
-                        <td>${i.tanggal}</td>
-                        <td><b>${i.nama}</b><br><small>${i.nomor}</small></td>
-                        <td>${i.produk} (${i.paket || '-'})</td>
-                        <td>Rp ${Number(i.harga).toLocaleString('id-ID')}</td>
-                        <td><b>${i.status_pembayaran}</b></td>
-                    </tr>
-                `).join('');
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada data.</td></tr>';
+        let queryParams = [];
+        if (mulai && selesai) { queryParams.push(`mulai=${mulai}`); queryParams.push(`selesai=${selesai}`); }
+        if (status && status !== 'SEMUA') { queryParams.push(`status=${status}`); }
+
+        const url = '/api/transaksi' + (queryParams.length > 0 ? '?' + queryParams.join('&') : '');
+
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const tbody = document.getElementById('rekapTableBody');
+
+            if (data.ok) {
+                document.getElementById('sumOmset').innerText = 'Rp ' + Number(data.ringkasan.totalOmset || data.ringkasan.total_omset || 0).toLocaleString('id-ID');
+                document.getElementById('sumLunas').innerText = 'Rp ' + Number(data.ringkasan.totalLunas || data.ringkasan.total_lunas || 0).toLocaleString('id-ID');
+                document.getElementById('sumHutang').innerText = 'Rp ' + Number(data.ringkasan.totalHutang || data.ringkasan.total_hutang || 0).toLocaleString('id-ID');
+
+                if (data.data.length > 0) {
+                    tbody.innerHTML = data.data.map(item => `
+                        <tr>
+                            <td><small>${item.no_transaksi}</small></td>
+                            <td>${item.tanggal}</td>
+                            <td><b>${item.nama}</b><br><small style="color:#aaa">${item.nomor}</small></td>
+                            <td>${item.produk} ${item.paket ? '('+item.paket+')' : ''}</td>
+                            <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
+                            <td><span class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}">${item.status_pembayaran}</span></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#aaa;">Tidak ada data transaksi.</td></tr>';
+                }
             }
         } catch (e) {
             console.error(e);
@@ -134,10 +303,12 @@
 
         const payload = {
             tanggal: document.getElementById('tanggal').value,
+            jatuh_tempo: document.getElementById('jatuh_tempo').value,
             nama: document.getElementById('nama').value,
             nomor: document.getElementById('nomor').value,
             produk: document.getElementById('produk').value,
             paket: document.getElementById('paket').value,
+            harga_modal: document.getElementById('harga_modal').value,
             harga: document.getElementById('harga').value,
             status_pembayaran: document.getElementById('status_pembayaran').value
         };
@@ -152,22 +323,85 @@
             const result = await res.json();
 
             if (res.ok && result.ok) {
-                showAlert('✅ ' + result.message, true);
+                showAlert('✅ Transaksi Berhasil Disimpan!', true);
+                
+                // Simpan variabel untuk WhatsApp
+                currentLastData = { ...payload, no_transaksi: result.no_transaksi };
+
+                // Tampilkan Preview Nota
+                document.getElementById('n_trx').innerText = result.no_transaksi || '-';
+                document.getElementById('n_tgl').innerText = payload.tanggal;
+                document.getElementById('n_nama').innerText = payload.nama;
+                document.getElementById('n_nomor').innerText = payload.nomor;
+                document.getElementById('n_produk').innerText = payload.produk + (payload.paket ? ' ('+payload.paket+')' : '');
+                document.getElementById('n_harga').innerText = 'Rp ' + Number(payload.harga).toLocaleString('id-ID');
+                document.getElementById('n_status').innerText = payload.status_pembayaran;
+
+                if(payload.status_pembayaran === 'HUTANG' && payload.jatuh_tempo) {
+                    document.getElementById('n_jt').innerText = payload.jatuh_tempo;
+                    document.getElementById('n_row_jt').style.display = 'flex';
+                } else {
+                    document.getElementById('n_row_jt').style.display = 'none';
+                }
+
+                document.getElementById('notaCard').style.display = 'block';
+
+                // Reset Form
                 document.getElementById('nama').value = '';
                 document.getElementById('nomor').value = '';
                 document.getElementById('paket').value = '';
                 document.getElementById('harga').value = '';
+                document.getElementById('harga_modal').value = '';
+                document.getElementById('uang_bayar').value = '';
+                document.getElementById('kembalian').value = '';
+                document.getElementById('jatuh_tempo').value = '';
+
                 loadRekap();
             } else {
-                showAlert('❌ ' + (result.message || 'Gagal menyimpan ke server'), false);
+                showAlert('❌ ' + (result.message || 'Gagal menyimpan transaksi'), false);
             }
         } catch (err) {
             showAlert('❌ KONEKSI ERROR: ' + err.message, false);
         } finally {
             btn.disabled = false;
-            btn.innerText = 'Simpan Transaksi';
+            btn.innerText = '💾 Simpan Transaksi & Buat Nota';
         }
     });
+
+    function downloadNotaPNG() {
+        html2canvas(document.getElementById('notaPreview')).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'PPOB') + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+
+    function kirimNotaWA() {
+        if (!currentLastData) return;
+        let noHp = currentLastData.nomor.replace(/[^0-9]/g, '');
+        if (noHp.startsWith('0')) noHp = '62' + noHp.substring(1);
+
+        let teks = `*STRUK BUKTI TRANSAKSI - SEL YNF PPOB*\n` +
+                   `------------------------------------------\n` +
+                   `No Trx: ${currentLastData.no_transaksi}\n` +
+                   `Tanggal: ${currentLastData.tanggal}\n` +
+                   `Pelanggan: ${currentLastData.nama}\n` +
+                   `Nomor Tujuan: ${currentLastData.nomor}\n` +
+                   `Produk: ${currentLastData.produk} ${currentLastData.paket ? '('+currentLastData.paket+')' : ''}\n` +
+                   `Total Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+                   `Status Pembayaran: *${currentLastData.status_pembayaran}*\n`;
+                   
+        if (currentLastData.status_pembayaran === 'HUTANG' && currentLastData.jatuh_tempo) {
+            teks += `Jatuh Tempo: ${currentLastData.jatuh_tempo}\n`;
+        }
+
+        teks += `------------------------------------------\n` +
+                `Terima kasih telah bertransaksi di SEL YNF PPOB!`;
+
+        const waUrl = `https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`;
+        window.open(waUrl, '_blank');
+    }
 
     loadRekap();
 </script>
