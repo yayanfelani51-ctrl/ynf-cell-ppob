@@ -10,6 +10,9 @@ function json(data, status = 200) {
   });
 }
 
+// KATA SANDI / PIN DEFAULT LOGIN (Anda bisa mengubahnya di sini)
+const DEFAULT_PIN = "123456";
+
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') {
@@ -41,7 +44,19 @@ export default {
       const url = new URL(req.url);
       const path = url.pathname;
 
-      // 1. ENDPOINT UBAH STATUS (PUT)
+      // 1. ENDPOINT LOGIN
+      if (path === '/api/login' && req.method === 'POST') {
+        const b = await req.json();
+        const pinInput = String(b.pin || '').trim();
+
+        if (pinInput === DEFAULT_PIN) {
+          return json({ ok: true, message: 'Login berhasil!' });
+        } else {
+          return json({ ok: false, message: 'PIN / Kata Sandi salah!' }, 401);
+        }
+      }
+
+      // 2. ENDPOINT UBAH STATUS (PUT)
       if (path === '/api/transaksi/status' && req.method === 'PUT') {
         const b = await req.json();
         const id = b.id;
@@ -58,7 +73,7 @@ export default {
         return json({ ok: true, message: 'Status pembayaran berhasil diperbarui!' });
       }
 
-      // 2. ENDPOINT SIMPAN TRANSAKSI (POST)
+      // 3. ENDPOINT SIMPAN TRANSAKSI (POST)
       if (path === '/api/transaksi' && req.method === 'POST') {
         let b = await req.json();
 
@@ -91,7 +106,7 @@ export default {
         }, 201);
       }
 
-      // 3. ENDPOINT AMBIL REKAP (GET)
+      // 4. ENDPOINT AMBIL REKAP (GET)
       if (path === '/api/transaksi' && req.method === 'GET') {
         const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
         const data = rows.results || [];
