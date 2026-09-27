@@ -10,11 +10,11 @@
         body { background: #000000; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
         .container { max-width: 650px; margin: 0 auto; }
 
-        /* HEADER & LOGO UTAMA */
-        .header { text-align: center; padding: 22px 10px; margin-bottom: 20px; background: #0a0a0a; border-radius: 16px; border: 1px solid #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
-        .header img { width: 140px; height: auto; margin-bottom: 10px; border-radius: 8px; display: block; margin-left: auto; margin-right: auto; }
-        .header h1 { font-size: 28px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
-        .header p { font-size: 12px; color: #aaa; margin-top: 4px; letter-spacing: 1px; }
+        /* HEADER UTAMA & DESAIN LOGO SERASI */
+        .header { text-align: center; padding: 20px 10px; margin-bottom: 20px; background: #0a0a0a; border-radius: 16px; border: 1px solid #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .logo-box { width: 220px; height: 110px; margin: 0 auto 5px auto; display: flex; align-items: center; justify-content: center; }
+        .header h1 { font-size: 26px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; margin-top: 5px; }
+        .header p { font-size: 11px; color: #aaa; margin-top: 2px; letter-spacing: 2px; }
 
         .page-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
         .page-nav button { margin-top: 0; }
@@ -51,7 +51,7 @@
         .badge-lunas { background: #27ae60; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
         .badge-hutang { background: #e74c3c; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
 
-        /* NOTA BINGKAI EMAS */
+        /* NOTA PREVIEW WITH LOGO */
         #notaContainer { display: flex; justify-content: center; margin-bottom: 15px; }
         #notaPreview {
             background-color: #050505;
@@ -64,12 +64,11 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             position: relative;
         }
-        .n-logo-box { text-align: center; margin-bottom: 12px; }
-        .n-logo-box img { width: 130px; height: auto; display: block; margin-left: auto; margin-right: auto; }
+        .n-logo-box { width: 180px; height: 90px; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; }
 
         .n-title-box { margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px; text-align: center; }
-        .n-brand { font-size: 22px; font-weight: 800; color: #ffd700; letter-spacing: 1px; }
-        .n-subtitle { font-size: 11px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; }
+        .n-brand { font-size: 20px; font-weight: 800; color: #ffd700; letter-spacing: 1px; }
+        .n-subtitle { font-size: 10px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; }
 
         .n-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
         .n-label { color: #aaaaaa; font-weight: 400; width: 40%; }
@@ -92,7 +91,7 @@
 <div class="container">
     <!-- HEADER UTAMA LOGO YNF CELL -->
     <div class="header">
-        <img id="appLogo" alt="Logo YNF CELL">
+        <div class="logo-box" id="headerLogo"></div>
         <h1>YNF CELL</h1>
         <p>PPOB CENTER</p>
     </div>
@@ -202,9 +201,7 @@
             <h2>📄 Preview Nota Transaksi</h2>
             <div id="notaContainer">
                 <div id="notaPreview">
-                    <div class="n-logo-box">
-                        <img id="notaLogo" alt="Logo YNF CELL">
-                    </div>
+                    <div class="n-logo-box" id="notaLogo"></div>
 
                     <div class="n-title-box">
                         <div class="n-brand">YNF CELL</div>
@@ -338,22 +335,39 @@
 </div>
 
 <script>
-    // LOGO SVG BASE64 ASLI (GARANSI DIBACA BROWSER 100% TANPA SERVER LUAR)
-    const LOGO_BASE64 = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" width="100%" height="100%">
-            <rect width="100%" height="100%" fill="#000000"/>
-            <path d="M 40 30 Q 160 -10 280 30" stroke="#ffd700" stroke-width="7" fill="none" stroke-linecap="round"/>
-            <path d="M 25 145 Q 160 185 295 145" stroke="#ffd700" stroke-width="7" fill="none" stroke-linecap="round"/>
-            <text x="32" y="95" font-family="'Arial Black', 'Segoe UI', sans-serif" font-weight="900" font-size="58" fill="#ffffff">YNF</text>
-            <rect x="245" y="52" width="28" height="42" rx="5" stroke="#ffd700" stroke-width="4" fill="none" />
-            <circle cx="259" cy="88" r="2.5" fill="#ffd700" />
-            <text x="65" y="132" font-family="'Segoe UI', sans-serif" font-weight="800" font-size="22" fill="#ffffff" letter-spacing="10">— CELL —</text>
-        </svg>
-    `);
+    // KODE VECTOR SVG UNTUK LOGO YNF CELL PRESISI SESUAI GAMBAR
+    const YNF_SVG_LOGO = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
+            <!-- LENGKUNGAN EMAS ATAS (ORBIT) -->
+            <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
+            
+            <!-- LENGKUNGAN EMAS BAWAH (SWOOSH) -->
+            <path d="M 120 125 C 100 150, 105 170, 125 175 C 180 188, 300 145, 410 110 C 412 110, 412 115, 405 118 C 290 155, 170 198, 115 182 C 90 175, 85 148, 112 120 Z" fill="#e5b228" />
+            
+            <!-- HURUF Y (PUTIH + AKSEN EMAS) -->
+            <path d="M 102 96 L 142 96 L 163 125 L 163 170 L 140 170 L 140 138 L 122 113 L 102 113 Z" fill="#ffffff" />
+            <path d="M 142 96 L 182 96 L 153 138 L 140 138 L 163 125 Z" fill="#e5b228" opacity="0.95" />
 
-    // MASUKKAN LOGO
-    document.getElementById('appLogo').src = LOGO_BASE64;
-    document.getElementById('notaLogo').src = LOGO_BASE64;
+            <!-- HURUF N (PUTIH) -->
+            <path d="M 197 96 L 218 96 L 253 148 L 253 96 L 273 96 L 273 170 L 252 170 L 217 118 L 217 170 L 197 170 Z" fill="#ffffff" />
+
+            <!-- HURUF F (PUTIH) -->
+            <path d="M 288 96 L 388 96 L 373 115 L 311 115 L 311 127 L 363 127 L 350 144 L 311 144 L 311 170 L 288 170 Z" fill="#ffffff" />
+
+            <!-- IKON HP EMAS (SMARTPHONE) -->
+            <rect x="382" y="118" width="34" height="50" rx="5" stroke="#e5b228" stroke-width="4.5" fill="none" />
+            <circle cx="399" cy="158" r="2.5" fill="#e5b228" />
+
+            <!-- TEKS CELL + GARIS PISAH -->
+            <line x1="112" y1="210" x2="162" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+            <text x="250" y="218" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="28" fill="#ffffff" letter-spacing="18" text-anchor="middle">CELL</text>
+            <line x1="338" y1="210" x2="388" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+        </svg>
+    `;
+
+    // PASANG SVG KE HEADER DAN PREVIEW NOTA
+    document.getElementById('headerLogo').innerHTML = YNF_SVG_LOGO;
+    document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
 
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
