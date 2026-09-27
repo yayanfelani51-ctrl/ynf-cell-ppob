@@ -4,13 +4,12 @@ function json(data, status = 200) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     }
   });
 }
 
-// KATA SANDI / PIN DEFAULT LOGIN (Anda bisa mengubahnya di sini)
 const DEFAULT_PIN = "123456";
 
 export default {
@@ -56,7 +55,21 @@ export default {
         }
       }
 
-      // 2. ENDPOINT UBAH STATUS (PUT)
+      // 2. ENDPOINT HAPUS TRANSAKSI (DELETE)
+      if (path === '/api/transaksi' && req.method === 'DELETE') {
+        const b = await req.json();
+        const id = b.id;
+
+        if (!id) {
+          return json({ ok: false, message: 'ID Transaksi wajib diisi.' }, 400);
+        }
+
+        await env.DB.prepare('DELETE FROM transaksi WHERE id = ?').bind(id).run();
+
+        return json({ ok: true, message: 'Transaksi berhasil dihapus!' });
+      }
+
+      // 3. ENDPOINT UBAH STATUS (PUT)
       if (path === '/api/transaksi/status' && req.method === 'PUT') {
         const b = await req.json();
         const id = b.id;
@@ -73,7 +86,7 @@ export default {
         return json({ ok: true, message: 'Status pembayaran berhasil diperbarui!' });
       }
 
-      // 3. ENDPOINT SIMPAN TRANSAKSI (POST)
+      // 4. ENDPOINT SIMPAN TRANSAKSI (POST)
       if (path === '/api/transaksi' && req.method === 'POST') {
         let b = await req.json();
 
@@ -106,7 +119,7 @@ export default {
         }, 201);
       }
 
-      // 4. ENDPOINT AMBIL REKAP (GET)
+      // 5. ENDPOINT AMBIL REKAP (GET)
       if (path === '/api/transaksi' && req.method === 'GET') {
         const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
         const data = rows.results || [];
