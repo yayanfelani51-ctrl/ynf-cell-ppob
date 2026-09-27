@@ -10,7 +10,7 @@ function json(data, status = 200) {
   });
 }
 
-const DEFAULT_PIN = "123456";
+const DEFAULT_PIN = "654321";
 
 export default {
   async fetch(req, env) {
