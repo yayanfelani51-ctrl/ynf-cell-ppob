@@ -7,7 +7,7 @@
     
     <!-- KONFIGURASI PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0d0d0d">
+    <meta name="theme-color" content="#030305">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,22 +15,59 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background: #080808; 
-            color: #f1f1f1; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif; 
-            padding: 12px;
-            padding-bottom: 80px;
-            user-select: none;
+        :root {
+            --bg-main: #040407;
+            --accent-gold: #ffd700;
+            --accent-glow: #e5b228;
+            --card-bg: rgba(18, 18, 26, 0.7);
+            --border-glass: rgba(255, 215, 0, 0.18);
+            --text-muted: #8e8e93;
+            --success: #30d158;
+            --danger: #ff453a;
         }
-        .container { max-width: 480px; margin: 0 auto; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg-main);
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(229, 178, 40, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #f5f5f7; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; 
+            padding: 12px;
+            user-select: none;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 480px; 
+            margin: 0 auto; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ANIMASI */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(229, 178, 40, 0.15); }
+            50% { box-shadow: 0 0 25px rgba(229, 178, 40, 0.35); }
+            100% { box-shadow: 0 0 15px rgba(229, 178, 40, 0.15); }
+        }
+
+        @keyframes floatAnim {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
 
         /* SPLASH SCREEN */
         #splashScreen {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: #080808;
+            background: #030305;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -38,183 +75,329 @@
             justify-content: center;
             transition: opacity 0.5s ease, visibility 0.5s;
         }
-        #splashScreen .splash-logo { width: 180px; height: 90px; }
+        #splashScreen .splash-logo { width: 210px; height: 105px; filter: drop-shadow(0 0 20px rgba(229,178,40,0.4)); }
 
-        /* TOP APP BAR */
-        .top-bar {
+        /* TAMPILAN KHUSUS HALAMAN LOGIN AESTHETIC & CENTERED */
+        #pageLogin {
+            flex: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            padding: 10px 16px;
-            border-radius: 16px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            justify-content: center;
+            padding: 20px 10px;
+            width: 100%;
         }
-        .top-bar-brand { display: flex; align-items: center; gap: 10px; }
-        .top-bar-logo { width: 50px; height: 30px; }
-        .top-bar-title { font-size: 16px; font-weight: 800; color: #ffd700; letter-spacing: 0.5px; }
-        .top-bar-sub { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: rgba(16, 16, 24, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7),
+                        0 0 30px rgba(229, 178, 40, 0.08);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: floatAnim 6s ease-in-out infinite;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: -60px;
+            width: 120px; height: 120px;
+            background: rgba(255, 215, 0, 0.12);
+            filter: blur(40px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-avatar {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 16px auto;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02));
+            border: 1.5px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 0 20px rgba(229, 178, 40, 0.25);
+        }
+
+        .login-brand-title {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(180deg, #ffffff 40%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .login-sub-title {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        /* JAM DIGITAL ELEGAN DI BAGIAN ATAS */
+        .digital-clock-card {
+            background: linear-gradient(135deg, rgba(25, 25, 35, 0.8), rgba(10, 10, 15, 0.9));
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            text-align: center;
+            animation: pulseGlow 4s infinite ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .digital-clock-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .clock-time {
+            font-size: 38px;
+            font-weight: 900;
+            background: linear-gradient(180deg, #ffffff 30%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3));
+        }
+        .clock-date {
+            font-size: 11px;
+            color: #a1a1a6;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        /* TOP DASHBOARD BANNER */
+        .top-dash {
+            background: rgba(18, 18, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 18px;
+            border-radius: 22px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .top-dash-header { display: flex; justify-content: space-between; align-items: center; }
+        .top-dash-brand { display: flex; align-items: center; gap: 12px; }
+        .top-dash-logo { width: 55px; height: 32px; filter: drop-shadow(0 0 10px rgba(229,178,40,0.3)); }
+        .top-dash-title { font-size: 18px; font-weight: 900; color: var(--accent-gold); letter-spacing: 0.5px; }
+        .top-dash-sub { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+        
+        .status-badge {
+            font-size: 10px; color: var(--success); font-weight: 800; 
+            background: rgba(48, 209, 88, 0.12); padding: 6px 12px; 
+            border-radius: 20px; border: 1px solid rgba(48, 209, 88, 0.25);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .status-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
 
         /* BANNER INSTALL PWA */
         #pwaInstallBanner {
             display: none;
-            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(20,20,20,0.9));
-            border: 1px solid #ffd700;
-            padding: 10px 14px;
-            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(229,178,40,0.25), rgba(15,15,20,0.95));
+            border: 1px solid var(--accent-gold);
+            padding: 12px 16px;
+            border-radius: 18px;
             margin-bottom: 14px;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 0 20px rgba(229,178,40,0.2);
         }
-        #pwaInstallBanner span { font-size: 11px; font-weight: 600; color: #ffd700; }
-        #pwaInstallBanner button { width: auto; padding: 6px 14px; margin-top: 0; font-size: 11px; border-radius: 20px; }
+        #pwaInstallBanner span { font-size: 12px; font-weight: 700; color: var(--accent-gold); }
+        #pwaInstallBanner button { width: auto; padding: 8px 18px; margin-top: 0; font-size: 11px; border-radius: 20px; }
 
-        /* KARTU UTAMA (CARD) */
+        /* KARTU UTAMA GLASSMORPHISM */
         .card { 
-            background: #121212; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 20px; 
-            padding: 18px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6); 
+            border-radius: 24px; 
+            padding: 20px; 
+            margin-bottom: 16px; 
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6); 
         }
-        h2 { color: #ffd700; margin-bottom: 14px; font-size: 14px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-title { 
+            color: var(--accent-gold); 
+            margin-bottom: 16px; 
+            font-size: 13px; 
+            font-weight: 800; 
+            border-bottom: 1px solid rgba(255,255,255,0.06); 
+            padding-bottom: 10px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
 
-        /* GRID IKON PRODUK FINTECH */
+        /* GRID PRODUK NEON */
         .produk-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
         .produk-item {
-            background: #1a1a1a;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 10px 5px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            padding: 14px 8px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        .produk-item span { font-size: 20px; display: block; margin-bottom: 4px; }
-        .produk-item p { font-size: 10px; font-weight: 600; color: #aaa; }
+        .produk-item span { font-size: 24px; display: block; margin-bottom: 6px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
+        .produk-item p { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+        .produk-item:active { transform: scale(0.93); }
         .produk-item.active {
-            background: rgba(255, 215, 0, 0.15);
-            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(229,178,40,0.25), rgba(229,178,40,0.05));
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 18px rgba(229,178,40,0.25);
+            transform: translateY(-2px);
         }
-        .produk-item.active p { color: #ffd700; font-weight: 700; }
+        .produk-item.active p { color: var(--accent-gold); font-weight: 800; }
 
-        /* FORM ELEMENTS */
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; font-weight: 600; }
+        /* INPUT FIELD STYLISH */
+        .form-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { 
             width: 100%; 
-            padding: 12px; 
-            border-radius: 12px; 
-            border: 1px solid #282828; 
-            background: #181818; 
+            padding: 14px 16px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(0, 0, 0, 0.55); 
             color: #ffffff; 
-            font-size: 13px; 
-            transition: border-color 0.2s, background 0.2s;
+            font-size: 14px; 
+            font-weight: 600;
+            transition: all 0.25s ease;
         }
-        input:focus, select:focus { outline: none; border-color: #ffd700; background: #1c1c1c; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input:focus, select:focus { 
+            outline: none; 
+            border-color: var(--accent-gold); 
+            background: rgba(0,0,0,0.8); 
+            box-shadow: 0 0 15px rgba(229,178,40,0.25); 
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         button { 
             width: 100%; 
-            padding: 13px; 
-            background: linear-gradient(135deg, #ffd700, #c59b27); 
+            padding: 15px; 
+            background: linear-gradient(135deg, #ffd700, #e5b228); 
             border: none; 
-            border-radius: 12px; 
+            border-radius: 16px; 
             color: #000000; 
             font-weight: 800; 
             font-size: 14px; 
             cursor: pointer; 
-            margin-top: 8px; 
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-            transition: transform 0.1s ease;
+            margin-top: 10px; 
+            box-shadow: 0 6px 22px rgba(229, 178, 40, 0.3);
+            transition: all 0.25s ease;
         }
-        button:active { transform: scale(0.98); }
-        .btn-wa { background: linear-gradient(135deg, #25D366, #1da851); color: #ffffff; box-shadow: none; }
-        .btn-secondary { background: #222; color: #aaa; border: 1px solid #333; box-shadow: none; }
-        .btn-danger { background: #e74c3c; color: #ffffff; box-shadow: none; }
-        .btn-success { background: #27ae60; color: #ffffff; box-shadow: none; }
-        .btn-del { background: #c0392b; color: #ffffff; padding: 4px 8px; border-radius: 6px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
+        button:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-wa { background: linear-gradient(135deg, #30d158, #1db954); color: #ffffff; box-shadow: 0 6px 20px rgba(48,209,88,0.25); }
+        .btn-del { background: rgba(255,69,58,0.18); color: var(--danger); border: 1px solid rgba(255,69,58,0.35); padding: 5px 10px; border-radius: 10px; font-size: 10px; cursor: pointer; font-weight: 800; width: auto; margin-top: 0; }
 
-        #alert { padding: 12px; border-radius: 12px; margin-bottom: 12px; display: none; text-align: center; font-weight: bold; font-size: 12px; }
-        .alert-success { background: rgba(30, 130, 76, 0.9); color: white; border: 1px solid #27ae60; }
-        .alert-danger { background: rgba(150, 40, 27, 0.9); color: white; border: 1px solid #e74c3c; }
+        #alert { padding: 12px; border-radius: 16px; margin-bottom: 14px; display: none; text-align: center; font-weight: 800; font-size: 12px; }
+        .alert-success { background: rgba(48, 209, 88, 0.15); color: var(--success); border: 1px solid rgba(48, 209, 88, 0.3); }
+        .alert-danger { background: rgba(255, 69, 58, 0.15); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.3); }
 
-        /* SUMMARY BOXES */
-        .summary-box { display: flex; gap: 8px; margin-bottom: 12px; }
-        .summary-card { flex: 1; background: #161616; padding: 10px 6px; border-radius: 12px; text-align: center; border: 1px solid #222; }
-        .summary-card small { color: #777; font-size: 9px; text-transform: uppercase; }
-        .summary-card h4 { margin-top: 3px; font-size: 12px; font-weight: 800; }
+        /* REKAP CARD SUMMARY */
+        .summary-box { display: flex; gap: 10px; margin-bottom: 16px; }
+        .summary-card { flex: 1; background: rgba(0,0,0,0.35); padding: 14px 10px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.06); }
+        .summary-card small { color: var(--text-muted); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-card h4 { margin-top: 4px; font-size: 13px; font-weight: 800; }
 
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
-        th, td { padding: 10px 8px; border-bottom: 1px solid #1c1c1c; text-align: left; vertical-align: middle; }
-        th { color: #666; background: #151515; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; }
-        .badge-lunas { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; padding: 3px 6px; border-radius: 6px; font-size: 9px; font-weight: 700; }
-        .badge-hutang { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; padding: 3px 6px; border-radius: 6px; font-size: 9px; font-weight: 700; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; vertical-align: middle; }
+        th { color: var(--text-muted); background: rgba(255,255,255,0.02); text-transform: uppercase; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; }
+        .badge-lunas { background: rgba(48, 209, 88, 0.15); color: var(--success); border: 1px solid rgba(48, 209, 88, 0.3); padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; }
+        .badge-hutang { background: rgba(255, 69, 58, 0.15); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.3); padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; }
 
-        /* NOTA PREVIEW MODERN */
-        #notaContainer { display: flex; justify-content: center; margin-bottom: 12px; }
+        /* STRUK / NOTA DIGITAL PREMIUM */
+        #notaContainer { display: flex; justify-content: center; margin-bottom: 14px; }
         #notaPreview {
-            background-color: #0d0d0d;
+            background: #020204;
             color: #ffffff;
             width: 320px;
-            padding: 22px 18px;
-            border-radius: 20px;
-            border: 1px solid #ffd700;
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
-            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 26px 22px;
+            border-radius: 24px;
+            border: 1.5px solid var(--accent-glow);
+            box-shadow: 0 0 35px rgba(229, 178, 40, 0.2);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        .n-logo-box { width: 160px; height: 80px; margin: 0 auto 6px auto; display: flex; align-items: center; justify-content: center; }
-        .n-title-box { margin-bottom: 14px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 10px; text-align: center; }
-        .n-brand { font-size: 18px; font-weight: 900; color: #ffd700; letter-spacing: 1px; }
-        .n-subtitle { font-size: 9px; color: #aaaaaa; letter-spacing: 2px; }
-        .n-row { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 12px; }
-        .n-label { color: #888888; width: 40%; }
-        .n-val { color: #ffffff; font-weight: 700; text-align: right; width: 60%; word-break: break-word; }
-        .n-val-gold { color: #ffd700; font-weight: 700; text-align: right; }
-        .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.15); margin: 10px 0; }
-        .n-status-box { text-align: center; margin: 12px 0; }
+        .n-logo-box { width: 170px; height: 85px; margin: 0 auto 6px auto; display: flex; align-items: center; justify-content: center; }
+        .n-title-box { margin-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 12px; text-align: center; }
+        .n-brand { font-size: 20px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1px; }
+        .n-subtitle { font-size: 9px; color: var(--text-muted); letter-spacing: 2.5px; }
+        .n-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+        .n-label { color: var(--text-muted); width: 40%; font-weight: 600; }
+        .n-val { color: #ffffff; font-weight: 800; text-align: right; width: 60%; word-break: break-word; }
+        .n-val-gold { color: var(--accent-gold); font-weight: 800; text-align: right; }
+        .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.15); margin: 14px 0; }
+        .n-status-box { text-align: center; margin: 16px 0; }
         .n-status-text { font-size: 18px; font-weight: 900; letter-spacing: 2px; }
-        .n-status-hutang { color: #f39c12; }
-        .n-status-lunas { color: #2ecc71; }
-        .n-footer { text-align: center; color: #777777; font-size: 10px; margin-top: 10px; }
+        .n-status-hutang { color: #ff9f0a; }
+        .n-status-lunas { color: var(--success); }
+        .n-footer { text-align: center; color: #636366; font-size: 10px; margin-top: 12px; line-height: 1.4; }
 
-        /* BOTTOM NAVBAR (FINTECH NAV) */
+        /* FLOATING BOTTOM NAVBAR GLASS */
         .bottom-nav {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 65px;
-            background: rgba(15, 15, 15, 0.95);
-            backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255,255,255,0.08);
+            bottom: 12px; left: 16px; right: 16px;
+            max-width: 448px; margin: 0 auto;
+            height: 64px;
+            background: rgba(15, 15, 22, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 32px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #555;
+            color: #7c7c80;
             font-size: 10px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             width: 33.3%;
             height: 100%;
-            transition: color 0.2s;
+            transition: all 0.25s;
         }
-        .nav-item span { font-size: 20px; margin-bottom: 2px; }
-        .nav-item.active { color: #ffd700; }
+        .nav-item span { font-size: 20px; margin-bottom: 2px; filter: opacity(0.5); transition: all 0.25s; }
+        .nav-item.active { color: var(--accent-gold); }
+        .nav-item.active span { filter: opacity(1) drop-shadow(0 0 8px rgba(229,178,40,0.6)); transform: translateY(-2px); }
+        
+        .main-content {
+            padding-bottom: 95px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -222,273 +405,292 @@
 <!-- SPLASH SCREEN -->
 <div id="splashScreen">
     <div class="splash-logo" id="splashLogo"></div>
-    <p style="color: #ffd700; font-size: 11px; letter-spacing: 2px; margin-top: 12px; font-weight: 800;">YNF CELL PPOB</p>
+    <p style="color: var(--accent-gold); font-size: 11px; letter-spacing: 3px; margin-top: 14px; font-weight: 800;">YNF CELL PPOB</p>
 </div>
 
 <div class="container">
-    <!-- TOP BAR APLIKASI -->
-    <div class="top-bar">
-        <div class="top-bar-brand">
-            <div class="top-bar-logo" id="topLogo"></div>
-            <div>
-                <div class="top-bar-title">YNF CELL</div>
-                <div class="top-bar-sub">PPOB Center</div>
-            </div>
-        </div>
-        <div style="font-size: 10px; color: #2ecc71; font-weight: bold; background: rgba(46,204,113,0.1); padding: 4px 8px; border-radius: 10px; border: 1px solid rgba(46,204,113,0.3);">● ONLINE</div>
-    </div>
 
-    <!-- BANNER INSTALL PWA -->
-    <div id="pwaInstallBanner">
-        <span>📲 Pasang Aplikasi YNF CELL?</span>
-        <button id="btnPwaInstall">Install</button>
-    </div>
-
-    <div id="alert"></div>
-
-    <!-- HALAMAN LOGIN -->
+    <!-- HALAMAN LOGIN (PRESISI DI TENGAH & AESTHETIC) -->
     <div id="pageLogin">
-        <div class="card" style="max-width: 400px; margin: 20px auto;">
-            <h2>🔒 Masuk Keamanan</h2>
+        <div class="login-card">
+            <div class="login-avatar">🔑</div>
+            <div class="login-brand-title">YNF CELL</div>
+            <div class="login-sub-title">Autentikasi Keamanan</div>
+            
             <form id="loginForm">
                 <div class="form-group">
-                    <label>PIN Admin</label>
-                    <input type="password" id="pinInput" placeholder="Masukkan PIN" required autocomplete="current-password">
+                    <label style="text-align:center;">PIN AKSES ADMIN</label>
+                    <input type="password" id="pinInput" placeholder="••••" required autocomplete="current-password" style="text-align:center; font-size: 20px; letter-spacing: 6px;">
                 </div>
-                <button type="submit" id="btnLogin">🔑 Masuk Aplikasi</button>
+                <button type="submit" id="btnLogin">🔓 Masuk Aplikasi</button>
             </form>
         </div>
     </div>
 
-    <!-- HALAMAN FORM TRANSAKSI -->
-    <div id="pageTransaksi" style="display:none;">
-        <div class="card">
-            <h2>📱 Pilih Layanan / Produk</h2>
-            <!-- GRID PRODUK VISUAL -->
-            <div class="produk-grid">
-                <div class="produk-item active" onclick="pilihProduk('Pulsa', this)">
-                    <span>📱</span>
-                    <p>Pulsa</p>
+    <!-- HALAMAN UTAMA (TRANSAKSI & REKAP) -->
+    <div class="main-content" id="mainApp" style="display:none;">
+        
+        <!-- KARTU JAM DIGITAL BAGIAN PALING ATAS -->
+        <div class="digital-clock-card">
+            <div class="clock-time" id="digitalTime">00:00:00</div>
+            <div class="clock-date" id="digitalDate">SENIN, 1 JANUARI 2026</div>
+        </div>
+
+        <!-- TOP DASHBOARD BAR -->
+        <div class="top-dash">
+            <div class="top-dash-header">
+                <div class="top-dash-brand">
+                    <div class="top-dash-logo" id="topLogo"></div>
+                    <div>
+                        <div class="top-dash-title">YNF CELL</div>
+                        <div class="top-dash-sub">PPOB Center</div>
+                    </div>
                 </div>
-                <div class="produk-item" onclick="pilihProduk('Paket Data', this)">
-                    <span>🌐</span>
-                    <p>Paket Data</p>
-                </div>
-                <div class="produk-item" onclick="pilihProduk('Token PLN', this)">
-                    <span>⚡</span>
-                    <p>Token PLN</p>
-                </div>
-                <div class="produk-item" onclick="pilihProduk('Voucher Game', this)">
-                    <span>🎮</span>
-                    <p>Voucher Game</p>
-                </div>
-                <div class="produk-item" onclick="pilihProduk('E-Money', this)">
-                    <span>💳</span>
-                    <p>E-Money</p>
-                </div>
-                <div class="produk-item" onclick="pilihProduk('Lainnya', this)">
-                    <span>🧾</span>
-                    <p>Lainnya</p>
+                <div class="status-badge">
+                    <div class="status-dot"></div> ONLINE
                 </div>
             </div>
+        </div>
 
-            <h2>📝 Rincian Transaksi</h2>
-            <form id="txForm">
-                <input type="hidden" id="produk" value="Pulsa">
+        <!-- BANNER INSTALL PWA -->
+        <div id="pwaInstallBanner">
+            <span>📲 Pasang Aplikasi YNF CELL?</span>
+            <button id="btnPwaInstall">Install</button>
+        </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Tanggal Transaksi</label>
-                        <input type="date" id="tanggal" required>
+        <div id="alert"></div>
+
+        <!-- HALAMAN FORM TRANSAKSI -->
+        <div id="pageTransaksi">
+            <div class="card">
+                <div class="card-title">⚡ Kategori Produk PPOB</div>
+                
+                <!-- GRID PRODUK VISUAL -->
+                <div class="produk-grid">
+                    <div class="produk-item active" onclick="pilihProduk('Pulsa', this)">
+                        <span>📱</span>
+                        <p>Pulsa</p>
                     </div>
+                    <div class="produk-item" onclick="pilihProduk('Paket Data', this)">
+                        <span>🌐</span>
+                        <p>Paket Data</p>
+                    </div>
+                    <div class="produk-item" onclick="pilihProduk('Token PLN', this)">
+                        <span>⚡</span>
+                        <p>Token PLN</p>
+                    </div>
+                    <div class="produk-item" onclick="pilihProduk('Voucher Game', this)">
+                        <span>🎮</span>
+                        <p>Voucher Game</p>
+                    </div>
+                    <div class="produk-item" onclick="pilihProduk('E-Money', this)">
+                        <span>💳</span>
+                        <p>E-Money</p>
+                    </div>
+                    <div class="produk-item" onclick="pilihProduk('Lainnya', this)">
+                        <span>🧾</span>
+                        <p>Lainnya</p>
+                    </div>
+                </div>
+
+                <div class="card-title">📝 Detail Transaksi & Pembayaran</div>
+                <form id="txForm">
+                    <input type="hidden" id="produk" value="Pulsa">
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Tanggal Transaksi</label>
+                            <input type="date" id="tanggal" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jatuh Tempo (Hutang)</label>
+                            <input type="date" id="jatuh_tempo">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Nama Pelanggan</label>
+                            <input type="text" id="nama" placeholder="Nama Pelanggan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nomor HP / ID Tujuan</label>
+                            <input type="text" id="nomor" placeholder="085695019006" required>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label>Jatuh Tempo (Hutang)</label>
-                        <input type="date" id="jatuh_tempo">
+                        <label>Paket / Deskripsi Nominal</label>
+                        <input type="text" id="paket" placeholder="Contoh: Tsel Data 10GB / PLN 50rb">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Harga Modal (Rp)</label>
+                            <input type="number" id="harga_modal" placeholder="50000">
+                        </div>
+                        <div class="form-group">
+                            <label>Harga Tagihan (Rp)</label>
+                            <input type="number" id="harga" placeholder="53000" required oninput="hitungKembalian()">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Uang Dibayar (Rp)</label>
+                            <input type="number" id="uang_bayar" placeholder="60000" oninput="hitungKembalian()">
+                        </div>
+                        <div class="form-group">
+                            <label>Kembalian (Rp)</label>
+                            <input type="text" id="kembalian" readonly placeholder="0" style="color: var(--accent-gold); font-weight:bold;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status Pembayaran</label>
+                        <select id="status_pembayaran">
+                            <option value="LUNAS">✅ LUNAS</option>
+                            <option value="HUTANG">⚠️ HUTANG</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="btnSimpan">💾 Simpan & Cetak Struk</button>
+                </form>
+            </div>
+
+            <!-- NOTA HASIL TRANSAKSI -->
+            <div class="card" id="notaCard" style="display:none;">
+                <div class="card-title">📄 Struk Digital Transaksi</div>
+                <div id="notaContainer">
+                    <div id="notaPreview">
+                        <div class="n-logo-box" id="notaLogo"></div>
+
+                        <div class="n-title-box">
+                            <div class="n-brand">YNF CELL</div>
+                            <div class="n-subtitle">PPOB CENTER</div>
+                        </div>
+
+                        <div class="n-row">
+                            <div class="n-label">No. Trx</div>
+                            <div class="n-val" id="n_trx">-</div>
+                        </div>
+                        <div class="n-row">
+                            <div class="n-label">Tanggal</div>
+                            <div class="n-val" id="n_tgl">-</div>
+                        </div>
+
+                        <div class="n-divider"></div>
+
+                        <div class="n-row">
+                            <div class="n-label">Produk</div>
+                            <div class="n-val" id="n_produk">-</div>
+                        </div>
+                        <div class="n-row">
+                            <div class="n-label">Pelanggan</div>
+                            <div class="n-val" id="n_nama">-</div>
+                        </div>
+                        <div class="n-row">
+                            <div class="n-label">No. Tujuan</div>
+                            <div class="n-val" id="n_nomor">-</div>
+                        </div>
+                        <div class="n-row">
+                            <div class="n-label">Nominal</div>
+                            <div class="n-val" id="n_paket">-</div>
+                        </div>
+                        <div class="n-row">
+                            <div class="n-label">Total Tagihan</div>
+                            <div class="n-val" id="n_harga">Rp 0</div>
+                        </div>
+                        <div class="n-row" id="n_row_jt" style="display:none;">
+                            <div class="n-label">Jatuh Tempo</div>
+                            <div class="n-val-gold" id="n_jt">-</div>
+                        </div>
+
+                        <div class="n-divider"></div>
+
+                        <div class="n-status-box">
+                            <div class="n-status-text" id="n_status_box">✅ LUNAS</div>
+                        </div>
+
+                        <div class="n-divider"></div>
+
+                        <div class="n-footer">
+                            Terima kasih telah bertransaksi<br>di <b>YNF CELL</b>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <button class="btn-wa" style="background: linear-gradient(135deg, #25d366, #128c7e);" onclick="downloadNotaPNG()">📥 Unduh PNG</button>
+                    <button class="btn-wa" onclick="kirimNotaWA()">💬 Kirim WhatsApp</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HALAMAN REKAP TRANSAKSI -->
+        <div id="pageRekap" style="display:none;">
+            <div class="card">
+                <div class="card-title">📊 Performa Penjualan & Laporan</div>
+                <div class="summary-box">
+                    <div class="summary-card">
+                        <small>Total Omset</small>
+                        <h4 id="sumOmset" style="color: var(--accent-gold);">Rp 0</h4>
+                    </div>
+                    <div class="summary-card">
+                        <small>Lunas</small>
+                        <h4 id="sumLunas" style="color: var(--success);">Rp 0</h4>
+                    </div>
+                    <div class="summary-card">
+                        <small>Hutang</small>
+                        <h4 id="sumHutang" style="color: var(--danger);">Rp 0</h4>
                     </div>
                 </div>
 
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Nama Pelanggan</label>
-                        <input type="text" id="nama" placeholder="Contoh: Lukman" required>
+                        <label>Mulai Tanggal</label>
+                        <input type="date" id="filterMulai">
                     </div>
                     <div class="form-group">
-                        <label>Nomor HP / ID Tujuan</label>
-                        <input type="text" id="nomor" placeholder="085695019006" required>
+                        <label>Sampai Tanggal</label>
+                        <input type="date" id="filterSelesai">
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label>Paket / Nominal</label>
-                    <input type="text" id="paket" placeholder="Contoh: Pulsa 50rb / Tsel Data 10GB">
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Harga Modal (Rp)</label>
-                        <input type="number" id="harga_modal" placeholder="50000">
-                    </div>
-                    <div class="form-group">
-                        <label>Harga Tagihan (Rp)</label>
-                        <input type="number" id="harga" placeholder="53000" required oninput="hitungKembalian()">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Uang Dibayar (Rp)</label>
-                        <input type="number" id="uang_bayar" placeholder="60000" oninput="hitungKembalian()">
-                    </div>
-                    <div class="form-group">
-                        <label>Kembalian (Rp)</label>
-                        <input type="text" id="kembalian" readonly placeholder="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Status Pembayaran</label>
-                    <select id="status_pembayaran">
+                    <label>Filter Status</label>
+                    <select id="filterStatus">
+                        <option value="SEMUA">Semua Status</option>
                         <option value="LUNAS">LUNAS</option>
                         <option value="HUTANG">HUTANG</option>
                     </select>
                 </div>
-
-                <button type="submit" id="btnSimpan">💾 Simpan & Terbit Struk</button>
-            </form>
-        </div>
-
-        <!-- NOTA HASIL TRANSAKSI -->
-        <div class="card" id="notaCard" style="display:none;">
-            <h2>📄 Pratinjau Struk Digital</h2>
-            <div id="notaContainer">
-                <div id="notaPreview">
-                    <div class="n-logo-box" id="notaLogo"></div>
-
-                    <div class="n-title-box">
-                        <div class="n-brand">YNF CELL</div>
-                        <div class="n-subtitle">PPOB CENTER</div>
-                    </div>
-
-                    <div class="n-row">
-                        <div class="n-label">No. Trx</div>
-                        <div class="n-val" id="n_trx">-</div>
-                    </div>
-                    <div class="n-row">
-                        <div class="n-label">Tanggal</div>
-                        <div class="n-val" id="n_tgl">-</div>
-                    </div>
-
-                    <div class="n-divider"></div>
-
-                    <div class="n-row">
-                        <div class="n-label">Produk</div>
-                        <div class="n-val" id="n_produk">-</div>
-                    </div>
-                    <div class="n-row">
-                        <div class="n-label">Pelanggan</div>
-                        <div class="n-val" id="n_nama">-</div>
-                    </div>
-                    <div class="n-row">
-                        <div class="n-label">No. Tujuan</div>
-                        <div class="n-val" id="n_nomor">-</div>
-                    </div>
-                    <div class="n-row">
-                        <div class="n-label">Nominal</div>
-                        <div class="n-val" id="n_paket">-</div>
-                    </div>
-                    <div class="n-row">
-                        <div class="n-label">Total Tagihan</div>
-                        <div class="n-val" id="n_harga">Rp 0</div>
-                    </div>
-                    <div class="n-row" id="n_row_jt" style="display:none;">
-                        <div class="n-label">Jatuh Tempo</div>
-                        <div class="n-val-gold" id="n_jt">-</div>
-                    </div>
-
-                    <div class="n-divider"></div>
-
-                    <div class="n-status-box">
-                        <div class="n-status-text" id="n_status_box">✅ LUNAS</div>
-                    </div>
-
-                    <div class="n-divider"></div>
-
-                    <div class="n-footer">
-                        Terima kasih telah bertransaksi<br>di <b>YNF CELL</b>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2">
-                <button class="btn-success" onclick="downloadNotaPNG()">📥 Unduh PNG</button>
-                <button class="btn-wa" onclick="kirimNotaWA()">💬 WhatsApp</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- HALAMAN REKAP TRANSAKSI -->
-    <div id="pageRekap" style="display:none;">
-        <div class="card">
-            <h2>📊 Performa Penjualan</h2>
-            <div class="summary-box">
-                <div class="summary-card">
-                    <small>Total Omset</small>
-                    <h4 id="sumOmset" style="color: #ffd700;">Rp 0</h4>
-                </div>
-                <div class="summary-card">
-                    <small>Lunas</small>
-                    <h4 id="sumLunas" style="color: #2ecc71;">Rp 0</h4>
-                </div>
-                <div class="summary-card">
-                    <small>Hutang</small>
-                    <h4 id="sumHutang" style="color: #e74c3c;">Rp 0</h4>
-                </div>
+                <button onclick="loadRekap()">🔍 Filter Laporan</button>
             </div>
 
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Mulai Tanggal</label>
-                    <input type="date" id="filterMulai">
+            <div class="card">
+                <div class="card-title">📋 Riwayat Transaksi Penjualan</div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Trx</th>
+                                <th>Tanggal</th>
+                                <th>Pelanggan</th>
+                                <th>Total</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rekapTableBody">
+                            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label>Sampai Tanggal</label>
-                    <input type="date" id="filterSelesai">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Filter Status</label>
-                <select id="filterStatus">
-                    <option value="SEMUA">Semua Status</option>
-                    <option value="LUNAS">LUNAS</option>
-                    <option value="HUTANG">HUTANG</option>
-                </select>
-            </div>
-            <button onclick="loadRekap()">🔍 Filter Laporan</button>
-        </div>
-
-        <div class="card">
-            <h2>📋 Riwayat Transaksi</h2>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Trx</th>
-                            <th>Tanggal</th>
-                            <th>Pelanggan</th>
-                            <th>Total</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rekapTableBody">
-                        <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
 
-<!-- BOTTOM NAVBAR -->
+<!-- FLOATING BOTTOM NAVBAR -->
 <div class="bottom-nav" id="bottomNav" style="display:none;">
     <div class="nav-item active" id="navTrx" onclick="bukaHalaman('transaksi')">
         <span>⚡</span> Kasir
@@ -502,7 +704,7 @@
 </div>
 
 <script>
-    // LOGO YNF CELL
+    // LOGO YNF CELL SVG
     const YNF_SVG_LOGO = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
             <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
@@ -523,23 +725,45 @@
     document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
     document.getElementById('splashLogo').innerHTML = YNF_SVG_LOGO;
 
+    // UPDATE JAM & TANGGAL DIGITAL REAL-TIME
+    function updateDigitalClock() {
+        const d = new Date();
+        const jam = String(d.getHours()).padStart(2, '0');
+        const menit = String(d.getMinutes()).padStart(2, '0');
+        const detik = String(d.getSeconds()).padStart(2, '0');
+        
+        document.getElementById('digitalTime').innerText = `${jam}:${menit}:${detik}`;
+
+        const hariList = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
+        const bulanList = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
+        
+        const hari = hariList[d.getDay()];
+        const tgl = d.getDate();
+        const bulan = bulanList[d.getMonth()];
+        const tahun = d.getFullYear();
+
+        document.getElementById('digitalDate').innerText = `${hari}, ${tgl} ${bulan} ${tahun}`;
+    }
+    setInterval(updateDigitalClock, 1000);
+    updateDigitalClock();
+
     // SPLASH SCREEN
     window.addEventListener('load', () => {
         setTimeout(() => {
             const splash = document.getElementById('splashScreen');
             splash.style.opacity = '0';
             setTimeout(() => { splash.style.display = 'none'; }, 500);
-        }, 1000);
+        }, 800);
     });
 
-    // PILIH PRODUK DARI GRID
+    // PILIH PRODUK
     function pilihProduk(val, el) {
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('produk').value = val;
     }
 
-    // SCRIPT PWA
+    // PWA INSTALL LOGIC
     let deferredPrompt;
     const banner = document.getElementById('pwaInstallBanner');
     const btnInstall = document.getElementById('btnPwaInstall');
@@ -567,7 +791,7 @@
     window.onload = function() {
         if (localStorage.getItem('ynf_is_logged') === 'true') {
             document.getElementById('pageLogin').style.display = 'none';
-            document.getElementById('pageTransaksi').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'block';
             document.getElementById('bottomNav').style.display = 'flex';
         }
     };
@@ -591,7 +815,7 @@
             if (res.ok && result.ok) {
                 localStorage.setItem('ynf_is_logged', 'true');
                 document.getElementById('pageLogin').style.display = 'none';
-                document.getElementById('pageTransaksi').style.display = 'block';
+                document.getElementById('mainApp').style.display = 'block';
                 document.getElementById('bottomNav').style.display = 'flex';
                 showAlert('✅ ' + result.message, true);
             } else {
@@ -601,16 +825,15 @@
             showAlert('❌ ERROR: ' + e.message, false);
         } finally {
             btn.disabled = false;
-            btn.innerText = '🔑 Masuk Aplikasi';
+            btn.innerText = '🔓 Masuk Aplikasi';
         }
     });
 
     function logout() {
         localStorage.removeItem('ynf_is_logged');
-        document.getElementById('pageTransaksi').style.display = 'none';
-        document.getElementById('pageRekap').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'none';
         document.getElementById('bottomNav').style.display = 'none';
-        document.getElementById('pageLogin').style.display = 'block';
+        document.getElementById('pageLogin').style.display = 'flex';
         document.getElementById('pinInput').value = '';
         showAlert('🔒 Anda telah keluar.', true);
     }
@@ -679,7 +902,7 @@
                         <tr>
                             <td><small>${item.no_transaksi}</small></td>
                             <td>${item.tanggal}</td>
-                            <td><b>${item.nama}</b><br><small style="color:#777">${item.nomor}</small></td>
+                            <td><b>${item.nama}</b><br><small style="color:var(--text-muted)">${item.nomor}</small></td>
                             <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
                             <td>
                                 <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatus(${item.id}, '${item.status_pembayaran}')">
@@ -690,7 +913,7 @@
                         </tr>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#777;">Tidak ada data.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Tidak ada data.</td></tr>';
                 }
             }
         } catch (e) {
@@ -733,7 +956,7 @@
 
             const result = await res.json();
             if (res.ok && result.ok) {
-                showAlert('🗑️ ' + result.message, true);
+                showAlert('🗑 ' + result.message, true);
                 loadRekap();
             } else {
                 showAlert('❌ Gagal menghapus transaksi', false);
@@ -823,13 +1046,13 @@
             showAlert('❌ KONEKSI ERROR: ' + err.message, false);
         } finally {
             btn.disabled = false;
-            btn.innerText = '💾 Simpan & Terbit Struk';
+            btn.innerText = '💾 Simpan & Cetak Struk';
         }
     });
 
     function downloadNotaPNG() {
         html2canvas(document.getElementById('notaPreview'), {
-            backgroundColor: '#0d0d0d',
+            backgroundColor: '#020204',
             scale: 2,
             logging: false
         }).then(canvas => {
@@ -873,7 +1096,7 @@
         }
 
         teks += `------------------------------------------\n` +
-                `Status: *${currentLastData.status_pembayaran === 'HUTANG' ? '⚠️ HUTANG' : '✅ LUNAS'}*\n\n` +
+                `Status: *${currentLastData.status_pembayaran === 'HUTANG' ? '⚠ HUTANG' : '✅ LUNAS'}*\n\n` +
                 `Terima kasih telah bertransaksi di *YNF CELL*`;
 
         let waUrl = '';
