@@ -26,7 +26,13 @@
             --danger: #ff453a;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation; /* Menghilangkan delay sentuhan 300ms pada mobile */
+        }
         
         body { 
             background: var(--bg-main);
@@ -73,7 +79,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
         #splashScreen .splash-logo { width: 210px; height: 105px; filter: drop-shadow(0 0 20px rgba(229,178,40,0.4)); }
 
@@ -265,11 +271,12 @@
             padding: 14px 8px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+            will-change: transform;
         }
         .produk-item span { font-size: 24px; display: block; margin-bottom: 6px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
         .produk-item p { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-        .produk-item:active { transform: scale(0.93); }
+        .produk-item:active { transform: scale(0.92); }
         .produk-item.active {
             background: linear-gradient(135deg, rgba(229,178,40,0.25), rgba(229,178,40,0.05));
             border-color: var(--accent-gold);
@@ -290,7 +297,7 @@
             color: #ffffff; 
             font-size: 14px; 
             font-weight: 600;
-            transition: all 0.25s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         input:focus, select:focus { 
             outline: none; 
@@ -312,9 +319,10 @@
             cursor: pointer; 
             margin-top: 10px; 
             box-shadow: 0 6px 22px rgba(229, 178, 40, 0.3);
-            transition: all 0.25s ease;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+            will-change: transform;
         }
-        button:active { transform: scale(0.97); opacity: 0.9; }
+        button:active { transform: scale(0.95); opacity: 0.9; }
         .btn-wa { background: linear-gradient(135deg, #30d158, #1db954); color: #ffffff; box-shadow: 0 6px 20px rgba(48,209,88,0.25); }
         .btn-del { background: rgba(255,69,58,0.18); color: var(--danger); border: 1px solid rgba(255,69,58,0.35); padding: 5px 10px; border-radius: 10px; font-size: 10px; cursor: pointer; font-weight: 800; width: auto; margin-top: 0; }
 
@@ -388,9 +396,10 @@
             cursor: pointer;
             width: 33.3%;
             height: 100%;
-            transition: all 0.25s;
+            transition: transform 0.1s ease, color 0.15s ease;
         }
-        .nav-item span { font-size: 20px; margin-bottom: 2px; filter: opacity(0.5); transition: all 0.25s; }
+        .nav-item:active { transform: scale(0.92); }
+        .nav-item span { font-size: 20px; margin-bottom: 2px; filter: opacity(0.5); transition: filter 0.15s ease, transform 0.15s ease; }
         .nav-item.active { color: var(--accent-gold); }
         .nav-item.active span { filter: opacity(1) drop-shadow(0 0 8px rgba(229,178,40,0.6)); transform: translateY(-2px); }
         
@@ -752,9 +761,26 @@
         setTimeout(() => {
             const splash = document.getElementById('splashScreen');
             splash.style.opacity = '0';
-            setTimeout(() => { splash.style.display = 'none'; }, 500);
-        }, 800);
+            setTimeout(() => { splash.style.display = 'none'; }, 300);
+        }, 500);
     });
+
+    // AUTO LOCK & RESET KE LOGIN KETIKA APLIKASI DITINGGALKAN / DITUTUP
+    function resetToLogin() {
+        localStorage.removeItem('ynf_is_logged');
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('bottomNav').style.display = 'none';
+        document.getElementById('pageLogin').style.display = 'flex';
+        document.getElementById('pinInput').value = '';
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            resetToLogin();
+        }
+    });
+
+    window.addEventListener('pagehide', resetToLogin);
 
     // PILIH PRODUK
     function pilihProduk(val, el) {
@@ -788,14 +814,7 @@
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
-    window.onload = function() {
-        if (localStorage.getItem('ynf_is_logged') === 'true') {
-            document.getElementById('pageLogin').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('bottomNav').style.display = 'flex';
-        }
-    };
-
+    // LOGIN PROCESS
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const pin = document.getElementById('pinInput').value;
@@ -830,11 +849,7 @@
     });
 
     function logout() {
-        localStorage.removeItem('ynf_is_logged');
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('bottomNav').style.display = 'none';
-        document.getElementById('pageLogin').style.display = 'flex';
-        document.getElementById('pinInput').value = '';
+        resetToLogin();
         showAlert('🔒 Anda telah keluar.', true);
     }
 
