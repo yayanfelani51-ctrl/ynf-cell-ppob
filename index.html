@@ -2,161 +2,219 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>YNF CELL PPOB</title>
     
-    <!-- KONFIGURASI PWA -->
+    <!-- KONFIGURASI PWA AGAR TAMPIL FULLSCREEN KELAS APLIKASI NATIVE -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0a0a0a">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="YNF CELL">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #000000; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
-        .container { max-width: 650px; margin: 0 auto; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: #050505; 
+            color: #ffffff; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            padding: 12px;
+            padding-bottom: 75px; /* Space untuk bottom navbar */
+            user-select: none;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
 
-        /* KEYFRAMES ANIMASI MASUK */
+        /* ANIMASI */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseLogo {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
         }
 
-        @keyframes zoomInLogo {
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        /* SPLASH SCREEN SEPERTI APLIKASI NATIVE */
+        #splashScreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #050505;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #splashScreen .splash-logo {
+            width: 200px;
+            height: 100px;
+            animation: pulseLogo 1.8s infinite ease-in-out;
         }
 
-        /* TERAPKAN ANIMASI */
+        /* HEADER & BANNER */
         .header { 
             text-align: center; 
-            padding: 20px 10px; 
-            margin-bottom: 20px; 
-            background: #0a0a0a; 
-            border-radius: 16px; 
-            border: 1px solid #d4af37; 
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); 
-            animation: zoomInLogo 0.6s ease-out forwards;
+            padding: 15px 10px; 
+            margin-bottom: 15px; 
+            background: #0d0d0d; 
+            border-radius: 18px; 
+            border: 1px solid rgba(212, 175, 55, 0.3); 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6); 
+            animation: fadeInUp 0.4s ease-out;
         }
+        .logo-box { width: 180px; height: 90px; margin: 0 auto 2px auto; display: flex; align-items: center; justify-content: center; }
+        .header h1 { font-size: 22px; color: #ffd700; letter-spacing: 1.5px; font-weight: 800; }
+        .header p { font-size: 10px; color: #888; letter-spacing: 2px; }
 
-        .card { 
-            background: #111111; 
-            border: 1px solid #222222; 
-            border-radius: 14px; 
-            padding: 18px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8); 
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-
-        /* BANNER TOMBOL INSTALL */
+        /* BANNER INSTALL PWA */
         #pwaInstallBanner {
             display: none;
-            background: linear-gradient(135deg, #222222, #111111);
+            background: #141414;
             border: 1px solid #ffd700;
-            padding: 12px 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            margin-bottom: 12px;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            animation: fadeInUp 0.4s ease-out forwards;
+            animation: fadeInUp 0.3s ease-out;
         }
-        #pwaInstallBanner span { font-size: 13px; font-weight: bold; color: #ffd700; }
-        #pwaInstallBanner button { width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; }
+        #pwaInstallBanner span { font-size: 12px; font-weight: 600; color: #ffd700; }
+        #pwaInstallBanner button { width: auto; padding: 6px 14px; margin-top: 0; font-size: 11px; border-radius: 20px; }
 
-        .logo-box { width: 220px; height: 110px; margin: 0 auto 5px auto; display: flex; align-items: center; justify-content: center; }
-        .header h1 { font-size: 26px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; margin-top: 5px; }
-        .header p { font-size: 11px; color: #aaa; margin-top: 2px; letter-spacing: 2px; }
-
-        .page-nav { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
-        .page-nav button { margin-top: 0; }
-
-        h2, h3 { color: #ffd700; margin-bottom: 12px; font-size: 17px; border-bottom: 1px solid #222222; padding-bottom: 8px; }
+        /* CARD DAN FORM STYLING */
+        .card { 
+            background: #101010; 
+            border: 1px solid #1f1f1f; 
+            border-radius: 16px; 
+            padding: 16px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+            animation: fadeInUp 0.4s ease-out;
+        }
+        h2 { color: #ffd700; margin-bottom: 12px; font-size: 15px; border-bottom: 1px solid #1f1f1f; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        
         .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; font-weight: 600; }
-        input, select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333333; background: #1a1a1a; color: #ffffff; font-size: 14px; }
+        label { display: block; font-size: 11px; color: #999; margin-bottom: 4px; font-weight: 600; }
+        input, select { 
+            width: 100%; 
+            padding: 11px 12px; 
+            border-radius: 10px; 
+            border: 1px solid #282828; 
+            background: #161616; 
+            color: #ffffff; 
+            font-size: 13px; 
+            transition: border-color 0.2s;
+        }
         input:focus, select:focus { outline: none; border-color: #ffd700; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #d4af37); border: none; border-radius: 8px; color: #000000; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 8px; transition: transform 0.1s ease; }
-        button:active { transform: scale(0.98); }
-        button:hover { background: #c59b27; }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: linear-gradient(135deg, #ffd700, #d4af37); 
+            border: none; 
+            border-radius: 10px; 
+            color: #000000; 
+            font-weight: bold; 
+            font-size: 14px; 
+            cursor: pointer; 
+            margin-top: 8px; 
+            transition: transform 0.1s ease, filter 0.2s; 
+        }
+        button:active { transform: scale(0.97); }
         .btn-wa { background: #25D366; color: #ffffff; }
-        .btn-wa:hover { background: #1da851; }
         .btn-secondary { background: #2980b9; color: #ffffff; }
         .btn-danger { background: #e74c3c; color: #ffffff; }
         .btn-success { background: #27ae60; color: #ffffff; }
-        .btn-del { background: #c0392b; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; margin-top: 4px; width: auto; }
+        .btn-del { background: #c0392b; color: #ffffff; padding: 5px 8px; border-radius: 6px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
 
-        #alert { padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; font-size: 13px; animation: fadeInUp 0.3s ease-out; }
+        #alert { padding: 10px; border-radius: 10px; margin-bottom: 12px; display: none; text-align: center; font-weight: bold; font-size: 12px; animation: fadeInUp 0.3s ease-out; }
         .alert-success { background: #1e824c; color: white; }
         .alert-danger { background: #96281b; color: white; }
 
-        .summary-box { display: flex; gap: 8px; margin-bottom: 15px; }
-        .summary-card { flex: 1; background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .summary-card small { color: #aaa; font-size: 10px; }
-        .summary-card h4 { margin-top: 4px; font-size: 13px; font-weight: bold; }
+        /* RINGKASAN REKAP */
+        .summary-box { display: flex; gap: 6px; margin-bottom: 12px; }
+        .summary-card { flex: 1; background: #161616; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid #222; }
+        .summary-card small { color: #888; font-size: 9px; }
+        .summary-card h4 { margin-top: 2px; font-size: 12px; font-weight: bold; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { padding: 8px; border-bottom: 1px solid #222222; text-align: left; vertical-align: middle; }
-        th { color: #aaa; background: #181818; }
-        .badge-lunas { background: #27ae60; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
-        .badge-hutang { background: #e74c3c; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; font-weight: bold; width: auto; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
+        th, td { padding: 8px; border-bottom: 1px solid #1a1a1a; text-align: left; vertical-align: middle; }
+        th { color: #888; background: #141414; }
+        .badge-lunas { background: #27ae60; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 9px; border: none; font-weight: bold; }
+        .badge-hutang { background: #e74c3c; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 9px; border: none; font-weight: bold; }
 
-        /* NOTA PREVIEW WITH LOGO */
-        #notaContainer { display: flex; justify-content: center; margin-bottom: 15px; }
+        /* NOTA PREVIEW */
+        #notaContainer { display: flex; justify-content: center; margin-bottom: 12px; }
         #notaPreview {
             background-color: #050505;
             color: #ffffff;
-            width: 330px;
-            padding: 24px 20px;
-            border-radius: 18px;
+            width: 310px;
+            padding: 20px 16px;
+            border-radius: 16px;
             border: 2px solid #d4af37;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
             font-family: 'Segoe UI', Arial, sans-serif;
-            position: relative;
         }
-        .n-logo-box { width: 180px; height: 90px; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; }
-
-        .n-title-box { margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 10px; text-align: center; }
-        .n-brand { font-size: 20px; font-weight: 800; color: #ffd700; letter-spacing: 1px; }
-        .n-subtitle { font-size: 10px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; }
-
-        .n-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; font-size: 13px; }
-        .n-label { color: #aaaaaa; font-weight: 400; width: 40%; }
+        .n-logo-box { width: 160px; height: 80px; margin: 0 auto 6px auto; display: flex; align-items: center; justify-content: center; }
+        .n-title-box { margin-bottom: 12px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 8px; text-align: center; }
+        .n-brand { font-size: 18px; font-weight: 800; color: #ffd700; letter-spacing: 1px; }
+        .n-subtitle { font-size: 9px; color: #cccccc; letter-spacing: 2px; }
+        .n-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; }
+        .n-label { color: #aaaaaa; width: 40%; }
         .n-val { color: #ffffff; font-weight: 700; text-align: right; width: 60%; word-break: break-word; }
         .n-val-gold { color: #ffd700; font-weight: 700; text-align: right; }
-
-        .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.2); margin: 12px 0; }
-
-        .n-status-box { text-align: center; margin: 18px 0 12px 0; }
-        .n-status-text { font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+        .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.2); margin: 10px 0; }
+        .n-status-box { text-align: center; margin: 12px 0; }
+        .n-status-text { font-size: 20px; font-weight: 900; letter-spacing: 2px; }
         .n-status-hutang { color: #f39c12; }
         .n-status-lunas { color: #27ae60; }
+        .n-footer { text-align: center; color: #888888; font-size: 10px; margin-top: 10px; }
 
-        .n-footer { text-align: center; color: #888888; font-size: 11px; margin-top: 15px; line-height: 1.4; }
-        .n-footer b { color: #ffffff; }
+        /* BOTTOM NAVBAR (NAVIGASI APLIKASI NATIVE) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 60px;
+            background: #0a0a0a;
+            border-top: 1px solid #1f1f1f;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.8);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 33.3%;
+            height: 100%;
+            transition: color 0.2s;
+        }
+        .nav-item span { font-size: 18px; margin-bottom: 2px; }
+        .nav-item.active { color: #ffd700; }
     </style>
 </head>
 <body>
 
+<!-- SPLASH SCREEN TAMPILAN AWAL APLIKASI -->
+<div id="splashScreen">
+    <div class="splash-logo" id="splashLogo"></div>
+    <p style="color: #ffd700; font-size: 12px; letter-spacing: 2px; margin-top: 10px; font-weight: bold;">MEMUAT APLIKASI...</p>
+</div>
+
 <div class="container">
-    <!-- BANNER TOMBOL INSTALL APLIKASI -->
+    <!-- BANNER INSTALL PWA -->
     <div id="pwaInstallBanner">
         <span>📲 Pasang Aplikasi YNF CELL?</span>
         <button id="btnPwaInstall">Install</button>
@@ -187,11 +245,6 @@
 
     <!-- HALAMAN FORM TRANSAKSI -->
     <div id="pageTransaksi" style="display:none;">
-        <div class="page-nav">
-            <button class="btn-secondary" onclick="bukaHalaman('rekap')">📊 Buka Rekapan Transaksi</button>
-            <button class="btn-danger" style="width:auto; padding: 10px 15px;" onclick="logout()">🚪 Logout</button>
-        </div>
-
         <div class="card">
             <h2>📱 Input Transaksi PPOB</h2>
             <form id="txForm">
@@ -209,7 +262,7 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Nama Pelanggan</label>
-                        <input type="text" id="nama" placeholder="Contoh: Lukman Bogel" required>
+                        <input type="text" id="nama" placeholder="Contoh: Lukman" required>
                     </div>
                     <div class="form-group">
                         <label>Nomor HP / ID Tujuan</label>
@@ -332,24 +385,19 @@
             </div>
             
             <div class="grid-2">
-                <button class="btn-success" onclick="downloadNotaPNG()">📥 Unduh Nota PNG</button>
-                <button class="btn-wa" onclick="kirimNotaWA()">💬 Kirim ke WhatsApp</button>
+                <button class="btn-success" onclick="downloadNotaPNG()">📥 Unduh PNG</button>
+                <button class="btn-wa" onclick="kirimNotaWA()">💬 WhatsApp</button>
             </div>
         </div>
     </div>
 
     <!-- HALAMAN REKAP TRANSAKSI -->
     <div id="pageRekap" style="display:none;">
-        <div class="page-nav">
-            <button class="btn-secondary" onclick="bukaHalaman('transaksi')">➕ Kembali ke Form Transaksi</button>
-            <button class="btn-danger" style="width:auto; padding: 10px 15px;" onclick="logout()">🚪 Logout</button>
-        </div>
-
         <div class="card">
-            <h2>📊 Ringkasan Penjualan & Filter</h2>
+            <h2>📊 Ringkasan Penjualan</h2>
             <div class="summary-box">
                 <div class="summary-card">
-                    <small>Total Omset</small>
+                    <small>Omset</small>
                     <h4 id="sumOmset" style="color: #ffd700;">Rp 0</h4>
                 </div>
                 <div class="summary-card">
@@ -385,7 +433,6 @@
 
         <div class="card">
             <h2>📋 Daftar Rekap Transaksi</h2>
-            <small style="color:#aaa; display:block; margin-bottom:10px;">💡 Klik tombol status untuk mengubah status, atau klik tombol Hapus untuk menghapus data.</small>
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
@@ -393,17 +440,29 @@
                             <th>No Trx</th>
                             <th>Tanggal</th>
                             <th>Pelanggan</th>
-                            <th>Produk</th>
                             <th>Harga</th>
                             <th>Aksi / Status</th>
                         </tr>
                     </thead>
                     <tbody id="rekapTableBody">
-                        <tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>
+                        <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAVBAR APLIKASI -->
+<div class="bottom-nav" id="bottomNav" style="display:none;">
+    <div class="nav-item active" id="navTrx" onclick="bukaHalaman('transaksi')">
+        <span>➕</span> Form
+    </div>
+    <div class="nav-item" id="navRekap" onclick="bukaHalaman('rekap')">
+        <span>📊</span> Rekap
+    </div>
+    <div class="nav-item" onclick="logout()">
+        <span>🚪</span> Logout
     </div>
 </div>
 
@@ -427,6 +486,16 @@
 
     document.getElementById('headerLogo').innerHTML = YNF_SVG_LOGO;
     document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
+    document.getElementById('splashLogo').innerHTML = YNF_SVG_LOGO;
+
+    // HILANGKAN SPLASH SCREEN SETELAH 1.2 DETIK
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const splash = document.getElementById('splashScreen');
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.display = 'none'; }, 500);
+        }, 1200);
+    });
 
     // SCRIPT PWA
     let deferredPrompt;
@@ -457,6 +526,7 @@
         if (localStorage.getItem('ynf_is_logged') === 'true') {
             document.getElementById('pageLogin').style.display = 'none';
             document.getElementById('pageTransaksi').style.display = 'block';
+            document.getElementById('bottomNav').style.display = 'flex';
         }
     };
 
@@ -480,6 +550,7 @@
                 localStorage.setItem('ynf_is_logged', 'true');
                 document.getElementById('pageLogin').style.display = 'none';
                 document.getElementById('pageTransaksi').style.display = 'block';
+                document.getElementById('bottomNav').style.display = 'flex';
                 showAlert('✅ ' + result.message, true);
             } else {
                 showAlert('❌ ' + (result.message || 'PIN Salah'), false);
@@ -496,19 +567,25 @@
         localStorage.removeItem('ynf_is_logged');
         document.getElementById('pageTransaksi').style.display = 'none';
         document.getElementById('pageRekap').style.display = 'none';
+        document.getElementById('bottomNav').style.display = 'none';
         document.getElementById('pageLogin').style.display = 'block';
         document.getElementById('pinInput').value = '';
         showAlert('🔒 Anda telah keluar.', true);
     }
 
     function bukaHalaman(hal) {
+        document.getElementById('navTrx').classList.remove('active');
+        document.getElementById('navRekap').classList.remove('active');
+
         if (hal === 'rekap') {
             document.getElementById('pageTransaksi').style.display = 'none';
             document.getElementById('pageRekap').style.display = 'block';
+            document.getElementById('navRekap').classList.add('active');
             loadRekap();
         } else {
             document.getElementById('pageRekap').style.display = 'none';
             document.getElementById('pageTransaksi').style.display = 'block';
+            document.getElementById('navTrx').classList.add('active');
         }
     }
 
@@ -561,18 +638,17 @@
                             <td><small>${item.no_transaksi}</small></td>
                             <td>${item.tanggal}</td>
                             <td><b>${item.nama}</b><br><small style="color:#aaa">${item.nomor}</small></td>
-                            <td>${item.produk} ${item.paket ? '('+item.paket+')' : ''}</td>
                             <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
                             <td>
                                 <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatus(${item.id}, '${item.status_pembayaran}')">
                                     ${item.status_pembayaran === 'LUNAS' ? '✅ LUNAS' : '⚠️ HUTANG'}
                                 </button>
-                                <button class="btn-del" onclick="hapusTransaksi(${item.id}, '${item.no_transaksi}')">🗑️️ Hapus</button>
+                                <button class="btn-del" onclick="hapusTransaksi(${item.id}, '${item.no_transaksi}')">🗑️</button>
                             </td>
                         </tr>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#aaa;">Tidak ada data transaksi.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#aaa;">Tidak ada data.</td></tr>';
                 }
             }
         } catch (e) {
@@ -604,7 +680,7 @@
     }
 
     async function hapusTransaksi(id, noTrx) {
-        if (!confirm(`Apakah Anda yakin ingin menghapus transaksi ${noTrx} secara permanen?`)) return;
+        if (!confirm(`Hapus transaksi ${noTrx}?`)) return;
 
         try {
             const res = await fetch('/api/transaksi', {
