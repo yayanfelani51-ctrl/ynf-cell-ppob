@@ -1,17 +1,18 @@
 {
-  "short_name": "YNF PPOB",
   "name": "YNF CELL PPOB",
+  "short_name": "YNF CELL",
+  "description": "Aplikasi Kasir & PPOB Center YNF CELL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1011/1011270.png",
-      "type": "image/png",
-      "sizes": "512x512",
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' fill='%23000000'><rect width='500' height='500' rx='100'/><path d='M 120 195 C 150 155, 220 135, 260 170 C 268 177, 258 188, 245 181 C 215 155, 160 170, 138 200 Z' fill='%23e5b228'/><path d='M 102 196 L 142 196 L 163 225 L 163 270 L 140 270 L 140 238 L 122 213 L 102 213 Z' fill='%23ffffff'/><path d='M 142 196 L 182 196 L 153 238 L 140 238 L 163 225 Z' fill='%23e5b228'/><path d='M 197 196 L 218 196 L 253 248 L 253 196 L 273 196 L 273 270 L 252 270 L 217 218 L 217 270 L 197 270 Z' fill='%23ffffff'/><path d='M 288 196 L 388 196 L 373 215 L 311 215 L 311 227 L 363 227 L 350 244 L 311 244 L 311 270 L 288 270 Z' fill='%23ffffff'/><rect x='382' y='218' width='34' height='50' rx='5' stroke='%23e5b228' stroke-width='4.5' fill='none'/><circle cx='399' cy='258' r='2.5' fill='%23e5b228'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#121212",
-  "theme_color": "#121212",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
