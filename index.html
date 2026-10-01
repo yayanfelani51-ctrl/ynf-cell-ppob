@@ -4,13 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YNF CELL PPOB</title>
+    
+    <!-- KONFIGURASI PWA AGAR BISA DIINSTAL -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="YNF CELL">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #000000; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; }
         .container { max-width: 650px; margin: 0 auto; }
 
-        /* HEADER UTAMA & DESAIN LOGO SERASI */
+        /* BANNER TOMBOL INSTALL */
+        #pwaInstallBanner {
+            display: none;
+            background: linear-gradient(135deg, #222222, #111111);
+            border: 1px solid #ffd700;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        #pwaInstallBanner span { font-size: 13px; font-weight: bold; color: #ffd700; }
+        #pwaInstallBanner button { width: auto; padding: 6px 12px; margin-top: 0; font-size: 12px; }
+
+        /* HEADER UTAMA & DESAIN LOGO */
         .header { text-align: center; padding: 20px 10px; margin-bottom: 20px; background: #0a0a0a; border-radius: 16px; border: 1px solid #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
         .logo-box { width: 220px; height: 110px; margin: 0 auto 5px auto; display: flex; align-items: center; justify-content: center; }
         .header h1 { font-size: 26px; color: #ffd700; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; margin-top: 5px; }
@@ -89,6 +112,12 @@
 <body>
 
 <div class="container">
+    <!-- BANNER TOMBOL INSTALL APLIKASI -->
+    <div id="pwaInstallBanner">
+        <span>📲 Pasang Aplikasi YNF CELL?</span>
+        <button id="btnPwaInstall">Install</button>
+    </div>
+
     <!-- HEADER UTAMA LOGO YNF CELL -->
     <div class="header">
         <div class="logo-box" id="headerLogo"></div>
@@ -105,7 +134,7 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label>PIN / Kata Sandi Admin</label>
-                    <input type="password" id="pinInput" placeholder="Masukkan PIN (Default: 123456)" required>
+                    <input type="password" id="pinInput" placeholder="Masukkan PIN" required>
                 </div>
                 <button type="submit" id="btnLogin">🔑 Masuk Aplikasi</button>
             </form>
@@ -335,39 +364,47 @@
 </div>
 
 <script>
-    // KODE VECTOR SVG UNTUK LOGO YNF CELL PRESISI SESUAI GAMBAR
+    // LOGO YNF CELL
     const YNF_SVG_LOGO = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
-            <!-- LENGKUNGAN EMAS ATAS (ORBIT) -->
             <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
-            
-            <!-- LENGKUNGAN EMAS BAWAH (SWOOSH) -->
             <path d="M 120 125 C 100 150, 105 170, 125 175 C 180 188, 300 145, 410 110 C 412 110, 412 115, 405 118 C 290 155, 170 198, 115 182 C 90 175, 85 148, 112 120 Z" fill="#e5b228" />
-            
-            <!-- HURUF Y (PUTIH + AKSEN EMAS) -->
             <path d="M 102 96 L 142 96 L 163 125 L 163 170 L 140 170 L 140 138 L 122 113 L 102 113 Z" fill="#ffffff" />
             <path d="M 142 96 L 182 96 L 153 138 L 140 138 L 163 125 Z" fill="#e5b228" opacity="0.95" />
-
-            <!-- HURUF N (PUTIH) -->
             <path d="M 197 96 L 218 96 L 253 148 L 253 96 L 273 96 L 273 170 L 252 170 L 217 118 L 217 170 L 197 170 Z" fill="#ffffff" />
-
-            <!-- HURUF F (PUTIH) -->
             <path d="M 288 96 L 388 96 L 373 115 L 311 115 L 311 127 L 363 127 L 350 144 L 311 144 L 311 170 L 288 170 Z" fill="#ffffff" />
-
-            <!-- IKON HP EMAS (SMARTPHONE) -->
             <rect x="382" y="118" width="34" height="50" rx="5" stroke="#e5b228" stroke-width="4.5" fill="none" />
             <circle cx="399" cy="158" r="2.5" fill="#e5b228" />
-
-            <!-- TEKS CELL + GARIS PISAH -->
             <line x1="112" y1="210" x2="162" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
             <text x="250" y="218" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="28" fill="#ffffff" letter-spacing="18" text-anchor="middle">CELL</text>
             <line x1="338" y1="210" x2="388" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
         </svg>
     `;
 
-    // PASANG SVG KE HEADER DAN PREVIEW NOTA
     document.getElementById('headerLogo').innerHTML = YNF_SVG_LOGO;
     document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
+
+    // SCRIPT PWA (PROMPT DENGAN TOMBOL INSTALL APLIKASI)
+    let deferredPrompt;
+    const banner = document.getElementById('pwaInstallBanner');
+    const btnInstall = document.getElementById('btnPwaInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        banner.style.display = 'flex';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                banner.style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+    });
 
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
