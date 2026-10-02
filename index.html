@@ -450,7 +450,7 @@
             <div class="card">
                 <div class="card-title">⚡ Kategori Produk PPOB</div>
                 
-                <!-- GRID PRODUK VISUAL -->
+                <!-- GRID PRODUK VISUAL (TERMASUK TAGIHAN PDAM) -->
                 <div class="produk-grid">
                     <div class="produk-item active" onclick="pilihProduk('Pulsa', this)">
                         <span>📱</span>
@@ -472,7 +472,11 @@
                         <span>💳</span>
                         <p>E-Money</p>
                     </div>
-                    <div class="produk-item" onclick="pilihProduk('Lainnya', this)">
+                    <div class="produk-item" onclick="pilihProduk('Tagihan PDAM', this)">
+                        <span>🚰</span>
+                        <p>Tagihan PDAM</p>
+                    </div>
+                    <div class="produk-item" onclick="pilihProduk('Lainnya', this)" style="grid-column: span 3;">
                         <span>🧾</span>
                         <p>Lainnya</p>
                     </div>
@@ -499,14 +503,14 @@
                             <input type="text" id="nama" placeholder="Nama Pelanggan" required>
                         </div>
                         <div class="form-group">
-                            <label>Nomor HP / ID Tujuan</label>
-                            <input type="text" id="nomor" placeholder="085695019006" required>
+                            <label id="labelNomor">Nomor HP / ID Tujuan</label>
+                            <input type="text" id="nomor" placeholder="085695019006 / ID Pelanggan" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Paket / Deskripsi Nominal</label>
-                        <input type="text" id="paket" placeholder="Contoh: Tsel Data 10GB / PLN 50rb">
+                        <label id="labelPaket">Paket / Deskripsi Nominal</label>
+                        <input type="text" id="paket" placeholder="Contoh: Tagihan Air Bulan Okt / Tsel Data 10GB">
                     </div>
 
                     <div class="grid-2">
@@ -847,6 +851,29 @@
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('produk').value = val;
+
+        // Custom Placeholder & Label sesuai pilihan
+        const labelNomor = document.getElementById('labelNomor');
+        const inputNomor = document.getElementById('nomor');
+        const labelPaket = document.getElementById('labelPaket');
+        const inputPaket = document.getElementById('paket');
+
+        if (val === 'Tagihan PDAM') {
+            labelNomor.innerText = 'ID Pelanggan PDAM';
+            inputNomor.placeholder = 'Contoh: 1029384756';
+            labelPaket.innerText = 'Wilayah / Wilayah PDAM';
+            inputPaket.placeholder = 'Contoh: PDAM Kota / Kab. Tirta';
+        } else if (val === 'Token PLN') {
+            labelNomor.innerText = 'ID Pelanggan / No Meter PLN';
+            inputNomor.placeholder = 'Contoh: 541200982721';
+            labelPaket.innerText = 'Nominal Token';
+            inputPaket.placeholder = 'Contoh: Token 50rb / 100rb';
+        } else {
+            labelNomor.innerText = 'Nomor HP / ID Tujuan';
+            inputNomor.placeholder = '085695019006';
+            labelPaket.innerText = 'Paket / Deskripsi Nominal';
+            inputPaket.placeholder = 'Contoh: Tsel Data 10GB / 50rb';
+        }
     }
 
     let currentLastData = null;
