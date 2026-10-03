@@ -295,7 +295,8 @@
         }
         button:active { transform: scale(0.96); opacity: 0.9; }
         .btn-wa { background: linear-gradient(135deg, #32d74b, #1db954); color: #ffffff; box-shadow: 0 6px 20px rgba(50,215,75,0.25); }
-        .btn-del { background: rgba(255,69,58,0.15); color: var(--danger); border: 1px solid rgba(255,69,58,0.3); padding: 6px 12px; border-radius: 10px; font-size: 10px; cursor: pointer; font-weight: 800; width: auto; margin-top: 0; }
+        .btn-nota { background: rgba(255, 215, 0, 0.15); color: var(--accent-gold); border: 1px solid var(--card-border); padding: 5px 10px; border-radius: 10px; font-size: 10px; cursor: pointer; font-weight: 800; width: auto; margin-top: 0; }
+        .btn-del { background: rgba(255,69,58,0.15); color: var(--danger); border: 1px solid rgba(255,69,58,0.3); padding: 5px 10px; border-radius: 10px; font-size: 10px; cursor: pointer; font-weight: 800; width: auto; margin-top: 0; }
 
         #alert { padding: 12px; border-radius: 16px; margin-bottom: 14px; display: none; text-align: center; font-weight: 800; font-size: 12px; animation: fadeIn 0.3s ease; }
         .alert-success { background: rgba(50, 215, 75, 0.15); color: var(--success); border: 1px solid rgba(50, 215, 75, 0.3); }
@@ -315,10 +316,11 @@
         .summary-card h4 { margin-top: 6px; font-size: 13px; font-weight: 900; }
 
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px; }
-        th, td { padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; vertical-align: middle; }
+        th, td { padding: 12px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; vertical-align: middle; }
         th { color: var(--text-secondary); background: rgba(255,255,255,0.02); text-transform: uppercase; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; }
-        .badge-lunas { background: rgba(50, 215, 75, 0.15); color: var(--success); border: 1px solid rgba(50, 215, 75, 0.3); padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; }
-        .badge-hutang { background: rgba(255, 69, 58, 0.15); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.3); padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; }
+        .badge-lunas { background: rgba(50, 215, 75, 0.15); color: var(--success); border: 1px solid rgba(50, 215, 75, 0.3); padding: 4px 6px; border-radius: 8px; font-size: 9px; font-weight: 800; }
+        .badge-hutang { background: rgba(255, 69, 58, 0.15); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.3); padding: 4px 6px; border-radius: 8px; font-size: 9px; font-weight: 800; }
+        .action-btns { display: flex; gap: 4px; align-items: center; }
 
         /* STRUK DIGITAL PREMIUM */
         #notaContainer { display: flex; justify-content: center; margin-bottom: 14px; }
@@ -450,7 +452,7 @@
             <div class="card">
                 <div class="card-title">⚡ Kategori Produk PPOB</div>
                 
-                <!-- GRID PRODUK VISUAL (TERMASUK TAGIHAN PDAM) -->
+                <!-- GRID PRODUK VISUAL -->
                 <div class="produk-grid">
                     <div class="produk-item active" onclick="pilihProduk('Pulsa', this)">
                         <span>📱</span>
@@ -723,6 +725,8 @@
     document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
     document.getElementById('splashLogo').innerHTML = YNF_SVG_LOGO;
 
+    let rekapDataList = [];
+
     // JAM DIGITAL REAL-TIME
     function updateDigitalClock() {
         const d = new Date();
@@ -852,7 +856,6 @@
         el.classList.add('active');
         document.getElementById('produk').value = val;
 
-        // Custom Placeholder & Label sesuai pilihan
         const labelNomor = document.getElementById('labelNomor');
         const inputNomor = document.getElementById('nomor');
         const labelPaket = document.getElementById('labelPaket');
@@ -977,22 +980,26 @@
             const tbody = document.getElementById('rekapTableBody');
 
             if (data.ok) {
+                rekapDataList = data.data; // Simpan daftar transaksi ke memori
                 document.getElementById('sumOmset').innerText = 'Rp ' + Number(data.ringkasan.totalOmset || 0).toLocaleString('id-ID');
                 document.getElementById('sumLunas').innerText = 'Rp ' + Number(data.ringkasan.totalLunas || 0).toLocaleString('id-ID');
                 document.getElementById('sumHutang').innerText = 'Rp ' + Number(data.ringkasan.totalHutang || 0).toLocaleString('id-ID');
 
                 if (data.data.length > 0) {
-                    tbody.innerHTML = data.data.map(item => `
+                    tbody.innerHTML = data.data.map((item, idx) => `
                         <tr>
                             <td><small>${item.no_transaksi}</small></td>
                             <td>${item.tanggal}</td>
                             <td><b>${item.nama}</b><br><small style="color:var(--text-secondary)">${item.nomor}</small></td>
                             <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
                             <td>
-                                <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatus(${item.id}, '${item.status_pembayaran}')">
-                                    ${item.status_pembayaran === 'LUNAS' ? 'LUNAS' : 'HUTANG'}
-                                </button>
-                                <button class="btn-del" onclick="hapusTransaksi(${item.id}, '${item.no_transaksi}')">🗑️</button>
+                                <div class="action-btns">
+                                    <button class="btn-nota" onclick="tampilkanNotaDariRekap(${idx})">📄 Struk</button>
+                                    <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatus(${item.id}, '${item.status_pembayaran}')">
+                                        ${item.status_pembayaran === 'LUNAS' ? 'LUNAS' : 'HUTANG'}
+                                    </button>
+                                    <button class="btn-del" onclick="hapusTransaksi(${item.id}, '${item.no_transaksi}')">🗑️</button>
+                                </div>
                             </td>
                         </tr>
                     `).join('');
@@ -1003,6 +1010,55 @@
         } catch (e) {
             console.error(e);
         }
+    }
+
+    // FUNGSI UNTUK MEMUNCULKAN STRUK DARI REKAP
+    function tampilkanNotaDariRekap(index) {
+        const item = rekapDataList[index];
+        if (!item) return;
+
+        currentLastData = {
+            no_transaksi: item.no_transaksi,
+            tanggal: item.tanggal,
+            produk: item.produk,
+            nama: item.nama,
+            nomor: item.nomor,
+            paket: item.paket,
+            harga: item.harga,
+            status_pembayaran: item.status_pembayaran,
+            jatuh_tempo: item.jatuh_tempo
+        };
+
+        document.getElementById('n_trx').innerText = item.no_transaksi;
+        document.getElementById('n_tgl').innerText = formatTanggalIndo(item.tanggal);
+        document.getElementById('n_produk').innerText = item.produk || '-';
+        document.getElementById('n_nama').innerText = item.nama;
+        document.getElementById('n_nomor').innerText = item.nomor;
+        document.getElementById('n_paket').innerText = item.paket || '-';
+        document.getElementById('n_harga').innerText = 'Rp ' + Number(item.harga).toLocaleString('id-ID');
+
+        const statusBox = document.getElementById('n_status_box');
+        const rowJt = document.getElementById('n_row_jt');
+
+        if (item.status_pembayaran === 'HUTANG') {
+            statusBox.innerText = '⚠️ HUTANG';
+            statusBox.className = 'n-status-text n-status-hutang';
+            if(item.jatuh_tempo) {
+                document.getElementById('n_jt').innerText = formatTanggalIndo(item.jatuh_tempo);
+                rowJt.style.display = 'flex';
+            } else {
+                rowJt.style.display = 'none';
+            }
+        } else {
+            statusBox.innerText = '✅ LUNAS';
+            statusBox.className = 'n-status-text n-status-lunas';
+            rowJt.style.display = 'none';
+        }
+
+        // Buka Halaman Transaksi & Scroll ke Struk
+        bukaHalaman('transaksi');
+        document.getElementById('notaCard').style.display = 'block';
+        document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
 
     async function ubahStatus(id, currentStatus) {
