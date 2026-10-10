@@ -83,6 +83,8 @@
             border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px 20px; border-radius: 24px; margin-bottom: 16px;
         }
         .top-dash-header { display: flex; justify-content: space-between; align-items: center; }
+        .top-dash-brand { display: flex; align-items: center; gap: 14px; }
+        .top-dash-logo { width: 60px; height: 34px; filter: drop-shadow(0 0 12px rgba(229,178,40,0.4)); }
         .top-dash-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); }
         .top-dash-sub { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; }
         
@@ -164,6 +166,7 @@
             background: #030305; color: #ffffff; width: 330px; padding: 30px 26px; border-radius: 28px;
             border: 1.5px solid var(--accent-glow); box-shadow: 0 0 45px rgba(229, 178, 40, 0.25);
         }
+        .n-logo-box { width: 180px; height: 90px; margin: 0 auto 8px auto; display: flex; align-items: center; justify-content: center; }
         .n-title-box { margin-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 14px; text-align: center; }
         .n-brand { font-size: 22px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1.5px; }
         .n-subtitle { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; }
@@ -200,7 +203,7 @@
 
 <div class="container">
 
-    <!-- HALAMAN LOGIN (LANGSUNG TAMPIL TANPA SPLASH SCREEN) -->
+    <!-- HALAMAN LOGIN -->
     <div id="pageLogin">
         <div class="login-card">
             <div class="login-avatar">🔑</div>
@@ -227,9 +230,12 @@
 
         <div class="top-dash">
             <div class="top-dash-header">
-                <div>
-                    <div class="top-dash-title">YNF CELL</div>
-                    <div class="top-dash-sub">PPOB Center</div>
+                <div class="top-dash-brand">
+                    <div class="top-dash-logo" id="topLogo"></div>
+                    <div>
+                        <div class="top-dash-title">YNF CELL</div>
+                        <div class="top-dash-sub">PPOB Center</div>
+                    </div>
                 </div>
                 <div class="status-badge"><div class="status-dot"></div> ONLINE</div>
             </div>
@@ -302,11 +308,12 @@
                 </form>
             </div>
 
-            <!-- STRUK DIGITAL -->
+            <!-- STRUK DIGITAL DENGAN LOGO KEMBALI -->
             <div class="card" id="notaCard" style="display:none;">
                 <div class="card-title">📄 Struk Digital Transaksi</div>
                 <div id="notaContainer">
                     <div id="notaPreview">
+                        <div class="n-logo-box" id="notaLogo"></div>
                         <div class="n-title-box"><div class="n-brand">YNF CELL</div><div class="n-subtitle">PPOB CENTER</div></div>
 
                         <div class="n-row"><div class="n-label">No. Trx</div><div class="n-val" id="n_trx">-</div></div>
@@ -394,6 +401,25 @@
 </div>
 
 <script>
+    const YNF_SVG_LOGO = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
+            <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
+            <path d="M 120 125 C 100 150, 105 170, 125 175 C 180 188, 300 145, 410 110 C 412 110, 412 115, 405 118 C 290 155, 170 198, 115 182 C 90 175, 85 148, 112 120 Z" fill="#e5b228" />
+            <path d="M 102 96 L 142 96 L 163 125 L 163 170 L 140 170 L 140 138 L 122 113 L 102 113 Z" fill="#ffffff" />
+            <path d="M 142 96 L 182 96 L 153 138 L 140 138 L 163 125 Z" fill="#e5b228" opacity="0.95" />
+            <path d="M 197 96 L 218 96 L 253 148 L 253 96 L 273 96 L 273 170 L 252 170 L 217 118 L 217 170 L 197 170 Z" fill="#ffffff" />
+            <path d="M 288 96 L 388 96 L 373 115 L 311 115 L 311 127 L 363 127 L 350 144 L 311 144 L 311 170 L 288 170 Z" fill="#ffffff" />
+            <rect x="382" y="118" width="34" height="50" rx="5" stroke="#e5b228" stroke-width="4.5" fill="none" />
+            <circle cx="399" cy="158" r="2.5" fill="#e5b228" />
+            <line x1="112" y1="210" x2="162" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+            <text x="250" y="218" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="28" fill="#ffffff" letter-spacing="18" text-anchor="middle">CELL</text>
+            <line x1="338" y1="210" x2="388" y2="210" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+        </svg>
+    `;
+
+    document.getElementById('topLogo').innerHTML = YNF_SVG_LOGO;
+    document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
+
     let rekapDataList = [];
     let myChart = null;
 
@@ -674,62 +700,4 @@
                 renderNotaView(currentLastData);
                 document.getElementById('formCard').style.display = 'none';
                 document.getElementById('notaCard').style.display = 'block';
-                document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('txForm').reset();
-                document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
-                document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
-            } else { showAlert('❌ ' + (result.message || 'Gagal'), false); }
-        } catch (err) { showAlert('❌ KONEKSI ERROR', false); }
-        finally { btn.disabled = false; btn.innerText = '💾 Simpan & Cetak Struk'; }
-    });
-
-    function downloadNotaPNG() {
-        html2canvas(document.getElementById('notaPreview'), { backgroundColor: '#030305', scale: 2 }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'YNF') + '.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-    }
-
-    function kirimNotaWA() {
-        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
-        let rawNo = String(currentLastData.nomor || '').replace(/[^0-9]/g, '');
-        let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : '62' + rawNo;
-
-        let teks = `*YNF CELL PPOB*\n` +
-                   `No Trx: ${currentLastData.no_transaksi}\n` +
-                   `Tanggal: ${formatTanggalIndo(currentLastData.tanggal)}\n` +
-                   `--------------------------------\n` +
-                   `Produk: ${currentLastData.produk}\n` +
-                   `Nama: ${currentLastData.nama}\n` +
-                   `ID: ${currentLastData.nomor}\n` +
-                   `Nominal: ${currentLastData.paket}\n`;
-
-        if (currentLastData.produk === 'Token PLN' && currentLastData.nomor_token) {
-            teks += `\n*TOKEN PLN:* \`${currentLastData.nomor_token}\`\n\n`;
-        }
-
-        teks += `Total: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
-                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
-
-        window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
-    }
-
-    async function cetakPrinterBluetooth() {
-        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
-        if (!navigator.bluetooth) return alert('Browser tidak mendukung Bluetooth.');
-        try {
-            const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] });
-            const server = await device.gatt.connect();
-            const service = await server.primaryService;
-            const characteristic = await service.characteristic;
-            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTotal: Rp ${currentLastData.harga}\n`;
-            await characteristic.writeValue(new TextEncoder().encode(data));
-            showAlert('✅ Tercetak!', true);
-        } catch (err) { showAlert('❌ Gagal cetak', false); }
-    }
-</script>
-
-</body>
-</html>
+                document.getElementById('notaCard').scrollIntoView({
