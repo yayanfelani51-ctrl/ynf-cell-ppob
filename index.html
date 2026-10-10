@@ -212,7 +212,7 @@
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label style="text-align:center;">MASUKKAN PIN ADMIN</label>
+                    <label style="text-align:center;">MASUKKAN PIN ADMIN (Default: 1234)</label>
                     <input type="password" id="pinInput" placeholder="••••" required style="text-align:center; font-size: 24px; letter-spacing: 8px;">
                 </div>
                 <button type="submit" id="btnLogin">🔓 Masuk Aplikasi</button>
@@ -308,7 +308,7 @@
                 </form>
             </div>
 
-            <!-- STRUK DIGITAL DENGAN LOGO KEMBALI -->
+            <!-- STRUK DIGITAL -->
             <div class="card" id="notaCard" style="display:none;">
                 <div class="card-title">📄 Struk Digital Transaksi</div>
                 <div id="notaContainer">
@@ -423,6 +423,16 @@
     let rekapDataList = [];
     let myChart = null;
 
+    // Cek jika sudah pernah login sebelumnya di HP ini
+    window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('ynf_is_logged') === 'true') {
+            document.getElementById('pageLogin').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('bottomNav').style.display = 'flex';
+            loadRekapLocal();
+        }
+    });
+
     function updateDigitalClock() {
         const d = new Date();
         document.getElementById('digitalTime').innerText = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
@@ -483,26 +493,29 @@
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    // VALIDASI PIN LOKAL (PIN DEFAULT: 1234 - Silakan ganti jika ingin PIN lain)
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const pin = document.getElementById('pinInput').value;
-        const btn = document.getElementById('btnLogin');
-        btn.disabled = true; btn.innerText = 'Memeriksa...';
-        try {
-            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin }) });
-            const result = await res.json();
-            if (res.ok && result.ok) {
-                localStorage.setItem('ynf_is_logged', 'true');
-                document.getElementById('pageLogin').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('bottomNav').style.display = 'flex';
-                showAlert('✅ ' + result.message, true);
-            } else { showAlert('❌ ' + (result.message || 'PIN Salah'), false); }
-        } catch (e) { showAlert('❌ ERROR: ' + e.message, false); }
-        finally { btn.disabled = false; btn.innerText = '🔓 Masuk Aplikasi'; }
+        const benarPin = '1234'; // Anda bisa ubah PIN di sini
+
+        if (pin === benarPin) {
+            localStorage.setItem('ynf_is_logged', 'true');
+            document.getElementById('pageLogin').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('bottomNav').style.display = 'flex';
+            showAlert('✅ Login Berhasil, Selamat Datang!', true);
+            loadRekapLocal();
+        } else {
+            showAlert('❌ PIN Salah! (Gunakan 1234)', false);
+            document.getElementById('pinInput').value = '';
+        }
     });
 
-    function logout() { resetToLogin(); showAlert('🔒 Anda telah keluar.', true); }
+    function logout() { 
+        resetToLogin(); 
+        showAlert('🔒 Anda telah keluar.', true); 
+    }
 
     function bukaHalaman(hal) {
         document.getElementById('navTrx').classList.remove('active');
@@ -511,7 +524,7 @@
             document.getElementById('pageTransaksi').style.display = 'none';
             document.getElementById('pageRekap').style.display = 'block';
             document.getElementById('navRekap').classList.add('active');
-            loadRekap();
+            loadRekapLocal();
         } else {
             document.getElementById('pageRekap').style.display = 'none';
             document.getElementById('pageTransaksi').style.display = 'block';
@@ -538,47 +551,51 @@
         return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tglStr;
     }
 
-    async function loadRekap() {
-        const mulai = document.getElementById('filterMulai').value;
-        const selesai = document.getElementById('filterSelesai').value;
-        const status = document.getElementById('filterStatus').value;
-        let queryParams = [];
-        if (mulai && selesai) { queryParams.push(`mulai=${mulai}`); queryParams.push(`selesai=${selesai}`); }
-        if (status && status !== 'SEMUA') queryParams.push(`status=${status}`);
-        const url = '/api/transaksi' + (queryParams.length > 0 ? '?' + queryParams.join('&') : '');
+    // PENYIMPANAN DATA TRANSAKSI LOKAL (LOCALSTORAGE)
+    function ambilSemuaTransaksi() {
+        return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
+    }
 
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            const tbody = document.getElementById('rekapTableBody');
-            if (data.ok) {
-                rekapDataList = data.data;
-                document.getElementById('sumOmset').innerText = 'Rp ' + Number(data.ringkasan.totalOmset || 0).toLocaleString('id-ID');
-                document.getElementById('sumLunas').innerText = 'Rp ' + Number(data.ringkasan.totalLunas || 0).toLocaleString('id-ID');
-                document.getElementById('sumHutang').innerText = 'Rp ' + Number(data.ringkasan.totalHutang || 0).toLocaleString('id-ID');
-                renderSalesChart(data.data);
+    function loadRekapLocal() {
+        const transaksiList = ambilSemuaTransaksi();
+        rekapDataList = transaksiList;
 
-                if (data.data.length > 0) {
-                    tbody.innerHTML = data.data.map((item, idx) => `
-                        <tr>
-                            <td><small>${item.no_transaksi}</small></td>
-                            <td>${item.tanggal}</td>
-                            <td><b>${item.nama}</b><br><small style="color:var(--text-secondary)">${item.nomor}</small></td>
-                            <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="btn-nota" onclick="tampilkanNotaDariRekap(${idx})">📄 Struk</button>
-                                    <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatus(${item.id}, '${item.status_pembayaran}')">${item.status_pembayaran}</button>
-                                    <button class="btn-del" onclick="hapusTransaksi(${item.id}, '${item.no_transaksi}')">🗑️</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Tidak ada data.</td></tr>';
-                }
-            }
-        } catch (e) { console.error(e); }
+        let totalOmset = 0;
+        let totalLunas = 0;
+        let totalHutang = 0;
+
+        transaksiList.forEach(t => {
+            const h = Number(t.harga) || 0;
+            totalOmset += h;
+            if (t.status_pembayaran === 'LUNAS') totalLunas += h;
+            else totalHutang += h;
+        });
+
+        document.getElementById('sumOmset').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+        document.getElementById('sumLunas').innerText = 'Rp ' + totalLunas.toLocaleString('id-ID');
+        document.getElementById('sumHutang').innerText = 'Rp ' + totalHutang.toLocaleString('id-ID');
+        renderSalesChart(transaksiList);
+
+        const tbody = document.getElementById('rekapTableBody');
+        if (transaksiList.length > 0) {
+            tbody.innerHTML = transaksiList.map((item, idx) => `
+                <tr>
+                    <td><small>${item.no_transaksi}</small></td>
+                    <td>${item.tanggal}</td>
+                    <td><b>${item.nama}</b><br><small style="color:var(--text-secondary)">${item.nomor}</small></td>
+                    <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-nota" onclick="tampilkanNotaDariRekap(${idx})">📄 Struk</button>
+                            <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatusLokal(${item.id})">${item.status_pembayaran}</button>
+                            <button class="btn-del" onclick="hapusTransaksiLokal(${item.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi.</td></tr>';
+        }
     }
 
     function renderSalesChart(transactions) {
@@ -600,7 +617,7 @@
     }
 
     function eksporKeExcel() {
-        if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data', false);
+        if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data untuk diekspor', false);
         const excelData = rekapDataList.map((item, index) => ({
             No: index + 1, 'No Transaksi': item.no_transaksi, Tanggal: item.tanggal, Pelanggan: item.nama,
             'No HP / ID': item.nomor, Produk: item.produk, Paket: item.paket || '-', 'Nomor Token': item.nomor_token || '-',
@@ -651,26 +668,29 @@
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    async function ubahStatus(id, currentStatus) {
-        const statusBaru = currentStatus === 'LUNAS' ? 'HUTANG' : 'LUNAS';
-        if (!confirm(`Ubah status menjadi ${statusBaru}?`)) return;
-        try {
-            const res = await fetch('/api/transaksi/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status_pembayaran: statusBaru }) });
-            const result = await res.json();
-            if (res.ok && result.ok) { showAlert('✅ ' + result.message, true); loadRekap(); }
-        } catch (e) { showAlert('❌ Gagal mengubah status', false); }
+    function ubahStatusLokal(id) {
+        let list = ambilSemuaTransaksi();
+        list = list.map(item => {
+            if (item.id === id) {
+                item.status_pembayaran = item.status_pembayaran === 'LUNAS' ? 'HUTANG' : 'LUNAS';
+            }
+            return item;
+        });
+        localStorage.setItem('ynf_transactions', JSON.stringify(list));
+        loadRekapLocal();
+        showAlert('✅ Status pembayaran diperbarui', true);
     }
 
-    async function hapusTransaksi(id, noTrx) {
-        if (!confirm(`Hapus transaksi ${noTrx}?`)) return;
-        try {
-            const res = await fetch('/api/transaksi', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-            const result = await res.json();
-            if (res.ok && result.ok) { showAlert('🗑 ' + result.message, true); loadRekap(); }
-        } catch (e) { showAlert('❌ Gagal menghapus', false); }
+    function hapusTransaksiLokal(id) {
+        if (!confirm('Hapus transaksi ini?')) return;
+        let list = ambilSemuaTransaksi();
+        list = list.filter(item => item.id !== id);
+        localStorage.setItem('ynf_transactions', JSON.stringify(list));
+        loadRekapLocal();
+        showAlert('🗑️ Transaksi dihapus', true);
     }
 
-    document.getElementById('txForm').addEventListener('submit', async (e) => {
+    document.getElementById('txForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSimpan');
         btn.disabled = true; btn.innerText = 'Menyimpan...';
@@ -679,10 +699,13 @@
         const namaVal = document.getElementById('nama').value;
         simpanPelangganKeLokal(nomorVal, namaVal);
 
-        const payload = {
+        const newTrx = {
+            id: Date.now(),
+            no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
             tanggal: document.getElementById('tanggal').value,
             jatuh_tempo: document.getElementById('jatuh_tempo').value,
-            nama: namaVal, nomor: nomorVal,
+            nama: namaVal, 
+            nomor: nomorVal,
             produk: document.getElementById('produk').value,
             paket: document.getElementById('paket').value,
             nomor_token: document.getElementById('nomor_token').value || '',
@@ -691,13 +714,71 @@
             status_pembayaran: document.getElementById('status_pembayaran').value
         };
 
+        let list = ambilSemuaTransaksi();
+        list.unshift(newTrx);
+        localStorage.setItem('ynf_transactions', JSON.stringify(list));
+
+        showAlert('✅ Berhasil Disimpan!', true);
+        currentLastData = newTrx;
+        renderNotaView(currentLastData);
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('notaCard').style.display = 'block';
+        document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('txForm').reset();
+        document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+        document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
+        
+        btn.disabled = false; 
+        btn.innerText = '💾 Simpan & Cetak Struk';
+    });
+
+    function downloadNotaPNG() {
+        html2canvas(document.getElementById('notaPreview'), { backgroundColor: '#030305', scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'YNF') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function kirimNotaWA() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        let rawNo = String(currentLastData.nomor || '').replace(/[^0-9]/g, '');
+        let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : '62' + rawNo;
+
+        let teks = `*YNF CELL PPOB*\n` +
+                   `No Trx: ${currentLastData.no_transaksi}\n` +
+                   `Tanggal: ${formatTanggalIndo(currentLastData.tanggal)}\n` +
+                   `--------------------------------\n` +
+                   `Produk: ${currentLastData.produk}\n` +
+                   `Nama: ${currentLastData.nama}\n` +
+                   `ID: ${currentLastData.nomor}\n` +
+                   `Nominal: ${currentLastData.paket}\n`;
+
+        if (currentLastData.produk === 'Token PLN' && currentLastData.nomor_token) {
+            teks += `\n*TOKEN PLN:* \`${currentLastData.nomor_token}\`\n\n`;
+        }
+
+        teks += `Total: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
+    }
+
+    async function cetakPrinterBluetooth() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        if (!navigator.bluetooth) return alert('Browser tidak mendukung Bluetooth.');
         try {
-            const res = await fetch('/api/transaksi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const result = await res.json();
-            if (res.ok && result.ok) {
-                showAlert('✅ Berhasil Disimpan!', true);
-                currentLastData = { ...payload, no_transaksi: result.no_transaksi };
-                renderNotaView(currentLastData);
-                document.getElementById('formCard').style.display = 'none';
-                document.getElementById('notaCard').style.display = 'block';
-                document.getElementById('notaCard').scrollIntoView({
+            const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] });
+            const server = await device.gatt.connect();
+            const service = await server.primaryService;
+            const characteristic = await service.characteristic;
+            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTotal: Rp ${currentLastData.harga}\n`;
+            await characteristic.writeValue(new TextEncoder().encode(data));
+            showAlert('✅ Tercetak!', true);
+        } catch (err) { showAlert('❌ Gagal cetak', false); }
+    }
+</script>
+
+</body>
+</html>
