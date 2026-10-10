@@ -57,7 +57,6 @@
             flex-direction: column;
         }
 
-        /* ANIMASI */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -277,6 +276,18 @@
             background: rgba(0,0,0,0.75); 
             box-shadow: 0 0 15px rgba(229,178,40,0.25); 
         }
+
+        /* KHUSUS FONT BESAR UNTUK NOMOR TOKEN */
+        input#nomor_token {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            text-align: center;
+            background: rgba(255, 215, 0, 0.05);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         button { 
@@ -337,6 +348,19 @@
         .n-title-box { margin-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 12px; text-align: center; }
         .n-brand { font-size: 20px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1px; }
         .n-subtitle { font-size: 9px; color: var(--text-secondary); letter-spacing: 2.5px; }
+        
+        /* KHUSUS NOMOR TOKEN DI NOTA (FONT BESAR) */
+        .n-token-box {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1.5px dashed var(--accent-gold);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            margin: 14px 0;
+        }
+        .n-token-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
+        .n-token-val { font-size: 17px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1.5px; word-break: break-all; font-family: monospace; }
+
         .n-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
         .n-label { color: var(--text-secondary); width: 40%; font-weight: 600; }
         .n-val { color: #ffffff; font-weight: 800; text-align: right; width: 60%; word-break: break-word; }
@@ -485,7 +509,7 @@
                 </div>
             </div>
 
-            <!-- FORM DETAIL TRANSAKSI (MUNCUL SETELAH KLIK PRODUK) -->
+            <!-- FORM DETAIL TRANSAKSI -->
             <div class="card" id="formCard" style="display:none;">
                 <div class="card-title" id="formCardTitle">📝 Detail Transaksi & Pembayaran</div>
                 <form id="txForm">
@@ -497,34 +521,40 @@
                             <input type="date" id="tanggal" required>
                         </div>
                         <div class="form-group">
-                            <label>Jatuh Tempo (Hutang)</label>
+                            <label>7. Tanggal Jatuh Tempo</label>
                             <input type="date" id="jatuh_tempo">
                         </div>
                     </div>
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Nama Pelanggan</label>
+                            <label>1. Nama Pelanggan</label>
                             <input type="text" id="nama" placeholder="Nama Pelanggan" required>
                         </div>
                         <div class="form-group">
-                            <label id="labelNomor">Nomor HP / ID Tujuan</label>
+                            <label id="labelNomor">2. Nomor ID Pelanggan</label>
                             <input type="text" id="nomor" placeholder="085695019006 / ID Pelanggan" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label id="labelPaket">Paket / Deskripsi Nominal</label>
-                        <input type="text" id="paket" placeholder="Contoh: Tagihan Air Bulan Okt / Tsel Data 10GB">
+                        <label id="labelPaket">3. Nominal Token / Paket</label>
+                        <input type="text" id="paket" placeholder="Contoh: Token 50rb / 100rb">
+                    </div>
+
+                    <!-- INPUT KHUSUS NOMOR TOKEN (MUNCUL KHUSUS DI TOKEN LISTRIK) -->
+                    <div class="form-group" id="groupNomorToken" style="display:none;">
+                        <label style="color:var(--accent-gold);">4. NOMOR TOKEN PLN (Struk / Kwh)</label>
+                        <input type="text" id="nomor_token" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
                     </div>
 
                     <div class="grid-2">
                         <div class="form-group">
-                            <label>Harga Modal (Rp)</label>
+                            <label>5. Harga Modal (Rp)</label>
                             <input type="number" id="harga_modal" placeholder="50000">
                         </div>
                         <div class="form-group">
-                            <label>Harga Tagihan (Rp)</label>
+                            <label>6. Harga Jual (Rp)</label>
                             <input type="number" id="harga" placeholder="53000" required oninput="hitungKembalian()">
                         </div>
                     </div>
@@ -541,7 +571,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Status Pembayaran</label>
+                        <label>8. Keterangan Status (Lunas / Hutang)</label>
                         <select id="status_pembayaran">
                             <option value="LUNAS">✅ LUNAS</option>
                             <option value="HUTANG">⚠️ HUTANG</option>
@@ -593,15 +623,24 @@
                             <div class="n-val" id="n_nama">-</div>
                         </div>
                         <div class="n-row">
-                            <div class="n-label">No. Tujuan</div>
+                            <div class="n-label">ID Pelanggan</div>
                             <div class="n-val" id="n_nomor">-</div>
                         </div>
                         <div class="n-row">
-                            <div class="n-label">Nominal</div>
+                            <div class="n-label">Nominal Token</div>
                             <div class="n-val" id="n_paket">-</div>
                         </div>
+
+                        <!-- KOTAK FONT BESAR NOMOR TOKEN DI STRUK -->
+                        <div id="n_token_wrapper" style="display:none;">
+                            <div class="n-token-box">
+                                <div class="n-token-label">Nomor Token PLN</div>
+                                <div class="n-token-val" id="n_nomor_token">0000-0000-0000-0000</div>
+                            </div>
+                        </div>
+
                         <div class="n-row">
-                            <div class="n-label">Total Tagihan</div>
+                            <div class="n-label">Total Harga</div>
                             <div class="n-val" id="n_harga">Rp 0</div>
                         </div>
                         <div class="n-row" id="n_row_jt" style="display:none;">
@@ -707,7 +746,6 @@
 </div>
 
 <script>
-    // LOGO YNF CELL VECTOR SVG
     const YNF_SVG_LOGO = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
             <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
@@ -730,29 +768,20 @@
 
     let rekapDataList = [];
 
-    // JAM DIGITAL REAL-TIME
     function updateDigitalClock() {
         const d = new Date();
         const jam = String(d.getHours()).padStart(2, '0');
         const menit = String(d.getMinutes()).padStart(2, '0');
         const detik = String(d.getSeconds()).padStart(2, '0');
-        
         document.getElementById('digitalTime').innerText = `${jam}:${menit}:${detik}`;
 
         const hariList = ['MINGGU', 'SENIN', 'SELASA', 'RABU', 'KAMIS', 'JUMAT', 'SABTU'];
         const bulanList = ['JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'];
-        
-        const hari = hariList[d.getDay()];
-        const tgl = d.getDate();
-        const bulan = bulanList[d.getMonth()];
-        const tahun = d.getFullYear();
-
-        document.getElementById('digitalDate').innerText = `${hari}, ${tgl} ${bulan} ${tahun}`;
+        document.getElementById('digitalDate').innerText = `${hariList[d.getDay()]}, ${d.getDate()} ${bulanList[d.getMonth()]} ${d.getFullYear()}`;
     }
     setInterval(updateDigitalClock, 1000);
     updateDigitalClock();
 
-    // SPLASH SCREEN & CEK BIOMETRIK
     window.addEventListener('load', async () => {
         setTimeout(() => {
             const splash = document.getElementById('splashScreen');
@@ -765,7 +794,6 @@
         }
     });
 
-    // AUTO LOCK KETIKA APLIKASI DITINGGALKAN / DITUTUP
     function resetToLogin() {
         localStorage.removeItem('ynf_is_logged');
         document.getElementById('mainApp').style.display = 'none';
@@ -775,71 +803,41 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-            resetToLogin();
-        }
+        if (document.visibilityState === 'hidden') resetToLogin();
     });
-
     window.addEventListener('pagehide', resetToLogin);
 
-    // LOGIC BIOMETRIK / SIDIK JARI (WebAuthn API)
     async function registerBiometrik() {
-        if (!window.PublicKeyCredential) {
-            alert("Sistem biometrik / sidik jari tidak didukung di browser ini.");
-            return;
-        }
-
+        if (!window.PublicKeyCredential) return alert("Biometrik tidak didukung.");
         try {
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
-
-            const createCredentialOptions = {
+            const cred = await navigator.credentials.create({
                 publicKey: {
-                    challenge: challenge,
+                    challenge,
                     rp: { name: "YNF CELL PPOB" },
-                    user: {
-                        id: new Uint8Array(16),
-                        name: "admin_ynf",
-                        displayName: "Admin YNF CELL"
-                    },
+                    user: { id: new Uint8Array(16), name: "admin_ynf", displayName: "Admin" },
                     pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
-                    timeout: 60000
+                    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" }
                 }
-            };
-
-            const cred = await navigator.credentials.create(createCredentialOptions);
+            });
             if (cred) {
                 localStorage.setItem('ynf_bio_cred', cred.id);
                 showAlert('✅ Sidik jari berhasil terdaftar!', true);
                 document.getElementById('cardRegisterFP').style.display = 'none';
             }
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
             showAlert('❌ Gagal mendaftarkan sidik jari', false);
         }
     }
 
     async function loginBiometrik() {
-        const credId = localStorage.getItem('ynf_bio_cred');
-        if (!credId || !window.PublicKeyCredential) {
-            alert("Silakan login dengan PIN terlebih dahulu untuk mendaftarkan sidik jari.");
-            return;
-        }
-
         try {
             const challenge = new Uint8Array(32);
             window.crypto.getRandomValues(challenge);
-
-            const getCredentialOptions = {
-                publicKey: {
-                    challenge: challenge,
-                    userVerification: "required",
-                    timeout: 60000
-                }
-            };
-
-            const assertion = await navigator.credentials.get(getCredentialOptions);
+            const assertion = await navigator.credentials.get({
+                publicKey: { challenge, userVerification: "required" }
+            });
             if (assertion) {
                 localStorage.setItem('ynf_is_logged', 'true');
                 document.getElementById('pageLogin').style.display = 'none';
@@ -847,52 +845,41 @@
                 document.getElementById('bottomNav').style.display = 'flex';
                 showAlert('✅ Login Sidik Jari Berhasil!', true);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
             showAlert('❌ Otentikasi sidik jari gagal', false);
         }
     }
 
-    // PILIH PRODUK & MUNCULKAN FORM
     function pilihProduk(val, el) {
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
         
         document.getElementById('produk').value = val;
         document.getElementById('formCardTitle').innerText = `📝 Transaksi: ${val}`;
-        
-        // Tampilkan Form & Sembunyikan Struk Lama (jika ada)
         document.getElementById('formCard').style.display = 'block';
         document.getElementById('notaCard').style.display = 'none';
         document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
 
-        const labelNomor = document.getElementById('labelNomor');
-        const inputNomor = document.getElementById('nomor');
-        const labelPaket = document.getElementById('labelPaket');
-        const inputPaket = document.getElementById('paket');
-
-        if (val === 'Tagihan PDAM') {
-            labelNomor.innerText = 'ID Pelanggan PDAM';
-            inputNomor.placeholder = 'Contoh: 1029384756';
-            labelPaket.innerText = 'Wilayah / Deskripsi PDAM';
-            inputPaket.placeholder = 'Contoh: PDAM Kota / Bulanan';
-        } else if (val === 'Token PLN') {
-            labelNomor.innerText = 'ID Pelanggan / No Meter PLN';
-            inputNomor.placeholder = 'Contoh: 541200982721';
-            labelPaket.innerText = 'Nominal Token';
-            inputPaket.placeholder = 'Contoh: Token 50rb / 100rb';
+        const groupToken = document.getElementById('groupNomorToken');
+        if (val === 'Token PLN') {
+            groupToken.style.display = 'block';
+            document.getElementById('labelNomor').innerText = '2. Nomor ID Pelanggan';
+            document.getElementById('labelPaket').innerText = '3. Nominal Token PLN';
+            document.getElementById('nomor').placeholder = '541200982721';
+            document.getElementById('paket').placeholder = 'Token 50rb / 100rb';
         } else {
-            labelNomor.innerText = 'Nomor HP / ID Tujuan';
-            inputNomor.placeholder = '085695019006';
-            labelPaket.innerText = 'Paket / Deskripsi Nominal';
-            inputPaket.placeholder = 'Contoh: Tsel Data 10GB / 50rb';
+            groupToken.style.display = 'none';
+            document.getElementById('nomor_token').value = '';
+            document.getElementById('labelNomor').innerText = '2. Nomor ID / HP Tujuan';
+            document.getElementById('labelPaket').innerText = '3. Paket / Nominal';
+            document.getElementById('nomor').placeholder = '085695019006';
+            document.getElementById('paket').placeholder = 'Contoh: Tsel Data 10GB';
         }
     }
 
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
-    // LOGIN PROCESS VIA PIN
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const pin = document.getElementById('pinInput').value;
@@ -906,16 +893,13 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pin })
             });
-
             const result = await res.json();
-
             if (res.ok && result.ok) {
                 localStorage.setItem('ynf_is_logged', 'true');
                 document.getElementById('pageLogin').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 document.getElementById('bottomNav').style.display = 'flex';
                 showAlert('✅ ' + result.message, true);
-
                 if (window.PublicKeyCredential && !localStorage.getItem('ynf_bio_cred')) {
                     document.getElementById('cardRegisterFP').style.display = 'block';
                 }
@@ -980,7 +964,7 @@
 
         let queryParams = [];
         if (mulai && selesai) { queryParams.push(`mulai=${mulai}`); queryParams.push(`selesai=${selesai}`); }
-        if (status && status !== 'SEMUA') { queryParams.push(`status=${status}`); }
+        if (status && status !== 'SEMUA') queryParams.push(`status=${status}`);
 
         const url = '/api/transaksi' + (queryParams.length > 0 ? '?' + queryParams.join('&') : '');
 
@@ -1022,22 +1006,7 @@
         }
     }
 
-    function tampilkanNotaDariRekap(index) {
-        const item = rekapDataList[index];
-        if (!item) return;
-
-        currentLastData = {
-            no_transaksi: item.no_transaksi,
-            tanggal: item.tanggal,
-            produk: item.produk,
-            nama: item.nama,
-            nomor: item.nomor,
-            paket: item.paket,
-            harga: item.harga,
-            status_pembayaran: item.status_pembayaran,
-            jatuh_tempo: item.jatuh_tempo
-        };
-
+    function renderNotaView(item) {
         document.getElementById('n_trx').innerText = item.no_transaksi;
         document.getElementById('n_tgl').innerText = formatTanggalIndo(item.tanggal);
         document.getElementById('n_produk').innerText = item.produk || '-';
@@ -1045,6 +1014,15 @@
         document.getElementById('n_nomor').innerText = item.nomor;
         document.getElementById('n_paket').innerText = item.paket || '-';
         document.getElementById('n_harga').innerText = 'Rp ' + Number(item.harga).toLocaleString('id-ID');
+
+        // Cek jika produk Token PLN dan ada nomor tokennya
+        const tokenWrapper = document.getElementById('n_token_wrapper');
+        if (item.produk === 'Token PLN' && item.nomor_token) {
+            document.getElementById('n_nomor_token').innerText = item.nomor_token;
+            tokenWrapper.style.display = 'block';
+        } else {
+            tokenWrapper.style.display = 'none';
+        }
 
         const statusBox = document.getElementById('n_status_box');
         const rowJt = document.getElementById('n_row_jt');
@@ -1063,9 +1041,16 @@
             statusBox.className = 'n-status-text n-status-lunas';
             rowJt.style.display = 'none';
         }
+    }
+
+    function tampilkanNotaDariRekap(index) {
+        const item = rekapDataList[index];
+        if (!item) return;
+        currentLastData = { ...item };
+        renderNotaView(item);
 
         bukaHalaman('transaksi');
-        document.getElementById('formCard').style.display = 'none'; // Sembunyikan form kasir
+        document.getElementById('formCard').style.display = 'none';
         document.getElementById('notaCard').style.display = 'block';
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
@@ -1078,40 +1063,33 @@
             const res = await fetch('/api/transaksi/status', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, status_pembayaran: statusBaru })
+                body: JSON.stringify({ id, status_pembayaran: statusBaru })
             });
-
             const result = await res.json();
             if (res.ok && result.ok) {
                 showAlert('✅ ' + result.message, true);
                 loadRekap();
-            } else {
-                showAlert('❌ Gagal mengubah status', false);
             }
         } catch (e) {
-            showAlert('❌ KONEKSI ERROR: ' + e.message, false);
+            showAlert('❌ Gagal mengubah status', false);
         }
     }
 
     async function hapusTransaksi(id, noTrx) {
         if (!confirm(`Hapus transaksi ${noTrx}?`)) return;
-
         try {
             const res = await fetch('/api/transaksi', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
+                body: JSON.stringify({ id })
             });
-
             const result = await res.json();
             if (res.ok && result.ok) {
                 showAlert('🗑 ' + result.message, true);
                 loadRekap();
-            } else {
-                showAlert('❌ Gagal menghapus transaksi', false);
             }
         } catch (e) {
-            showAlert('❌ KONEKSI ERROR: ' + e.message, false);
+            showAlert('❌ Gagal menghapus', false);
         }
     }
 
@@ -1121,9 +1099,6 @@
         btn.disabled = true;
         btn.innerText = 'Menyimpan...';
 
-        const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '.');
-
         const payload = {
             tanggal: document.getElementById('tanggal').value,
             jatuh_tempo: document.getElementById('jatuh_tempo').value,
@@ -1131,6 +1106,7 @@
             nomor: document.getElementById('nomor').value,
             produk: document.getElementById('produk').value,
             paket: document.getElementById('paket').value,
+            nomor_token: document.getElementById('nomor_token').value || '',
             harga_modal: document.getElementById('harga_modal').value,
             harga: document.getElementById('harga').value,
             status_pembayaran: document.getElementById('status_pembayaran').value
@@ -1142,57 +1118,22 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
             const result = await res.json();
 
             if (res.ok && result.ok) {
                 showAlert('✅ Transaksi Berhasil Disimpan!', true);
-                
-                const customNoTrx = result.no_transaksi;
-                currentLastData = { ...payload, no_transaksi: customNoTrx };
+                currentLastData = { ...payload, no_transaksi: result.no_transaksi };
+                renderNotaView(currentLastData);
 
-                document.getElementById('n_trx').innerText = customNoTrx;
-                document.getElementById('n_tgl').innerText = formatTanggalIndo(payload.tanggal) + ', ' + timeStr;
-                document.getElementById('n_produk').innerText = payload.produk;
-                document.getElementById('n_nama').innerText = payload.nama;
-                document.getElementById('n_nomor').innerText = payload.nomor;
-                document.getElementById('n_paket').innerText = payload.paket || '-';
-                document.getElementById('n_harga').innerText = 'Rp ' + Number(payload.harga).toLocaleString('id-ID');
-
-                const statusBox = document.getElementById('n_status_box');
-                const rowJt = document.getElementById('n_row_jt');
-
-                if (payload.status_pembayaran === 'HUTANG') {
-                    statusBox.innerText = '⚠️ HUTANG';
-                    statusBox.className = 'n-status-text n-status-hutang';
-                    if(payload.jatuh_tempo) {
-                        document.getElementById('n_jt').innerText = formatTanggalIndo(payload.jatuh_tempo);
-                        rowJt.style.display = 'flex';
-                    } else {
-                        rowJt.style.display = 'none';
-                    }
-                } else {
-                    statusBox.innerText = '✅ LUNAS';
-                    statusBox.className = 'n-status-text n-status-lunas';
-                    rowJt.style.display = 'none';
-                }
-
-                document.getElementById('formCard').style.display = 'none'; // Sembunyikan form setelah simpan
+                document.getElementById('formCard').style.display = 'none';
                 document.getElementById('notaCard').style.display = 'block';
                 document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
 
-                document.getElementById('nama').value = '';
-                document.getElementById('nomor').value = '';
-                document.getElementById('paket').value = '';
-                document.getElementById('harga').value = '';
-                document.getElementById('harga_modal').value = '';
-                document.getElementById('uang_bayar').value = '';
-                document.getElementById('kembalian').value = '';
-                document.getElementById('jatuh_tempo').value = '';
+                document.getElementById('txForm').reset();
+                document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
                 document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
-
             } else {
-                showAlert('❌ ' + (result.message || 'Gagal menyimpan transaksi'), false);
+                showAlert('❌ ' + (result.message || 'Gagal menyimpan'), false);
             }
         } catch (err) {
             showAlert('❌ KONEKSI ERROR: ' + err.message, false);
@@ -1216,21 +1157,10 @@
     }
 
     function kirimNotaWA() {
-        if (!currentLastData) {
-            showAlert('❌ Belum ada data transaksi tersimpan', false);
-            return;
-        }
+        if (!currentLastData) return showAlert('❌ Belum ada data transaksi', false);
 
         let rawNo = String(currentLastData.nomor || '').replace(/[^0-9]/g, '');
-        let noHp = '';
-
-        if (rawNo.startsWith('0')) {
-            noHp = '62' + rawNo.substring(1);
-        } else if (rawNo.startsWith('62')) {
-            noHp = rawNo;
-        } else if (rawNo.length >= 8) {
-            noHp = '62' + rawNo;
-        }
+        let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : (rawNo.startsWith('62') ? rawNo : '62' + rawNo);
 
         let teks = `*YNF CELL - PPOB CENTER*\n` +
                    `------------------------------------------\n` +
@@ -1239,25 +1169,22 @@
                    `------------------------------------------\n` +
                    `Produk: ${currentLastData.produk}\n` +
                    `Nama: ${currentLastData.nama}\n` +
-                   `Nomor / ID: ${currentLastData.nomor}\n` +
-                   `Paket / Nominal: ${currentLastData.paket || '-'}\n` +
-                   `Harga: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n`;
-                   
+                   `ID Pelanggan: ${currentLastData.nomor}\n` +
+                   `Nominal: ${currentLastData.paket}\n`;
+
+        if (currentLastData.produk === 'Token PLN' && currentLastData.nomor_token) {
+            teks += `\n*NOMOR TOKEN PLN:*\n\`${currentLastData.nomor_token}\`\n\n`;
+        }
+
+        teks += `Total Harga: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n`;
         if (currentLastData.status_pembayaran === 'HUTANG' && currentLastData.jatuh_tempo) {
             teks += `Jatuh Tempo: ${formatTanggalIndo(currentLastData.jatuh_tempo)}\n`;
         }
-
         teks += `------------------------------------------\n` +
                 `Status: *${currentLastData.status_pembayaran === 'HUTANG' ? '⚠ HUTANG' : '✅ LUNAS'}*\n\n` +
                 `Terima kasih telah bertransaksi di *YNF CELL*`;
 
-        let waUrl = '';
-        if (noHp.length >= 10) {
-            waUrl = `https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`;
-        } else {
-            waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(teks)}`;
-        }
-
+        let waUrl = noHp.length >= 10 ? `https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(teks)}`;
         window.open(waUrl, '_blank');
     }
 </script>
