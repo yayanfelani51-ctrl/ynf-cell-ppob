@@ -381,14 +381,12 @@
                 </div>
             </div>
 
-            <!-- MENU CADANGAN DATA -->
+            <!-- MENU PEMULIHAN / IMPOR DARI FILE EXCEL LAMA -->
             <div class="card">
-                <div class="card-title">💾 Cadangan & Pemulihan Data</div>
-                <div class="grid-2">
-                    <button class="btn-excel" onclick="backupDataJSON()">📤 Backup Data</button>
-                    <button class="btn-print" onclick="document.getElementById('restoreFile').click()">📥 Pulihkan Data</button>
-                    <input type="file" id="restoreFile" style="display:none" accept=".json" onchange="restoreDataJSON(event)">
-                </div>
+                <div class="card-title">📥 Pulihkan Riwayat dari File Excel</div>
+                <p style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">Pilih file laporan Excel (`.xlsx`) Anda untuk mengembalikan seluruh riwayat transaksi ke dalam aplikasi:</p>
+                <button class="btn-excel" onclick="document.getElementById('excelFile').click()">📂 Pilih File Excel (.xlsx)</button>
+                <input type="file" id="excelFile" style="display:none" accept=".xlsx, .xls" onchange="imporDariExcel(event)">
             </div>
 
             <div class="card">
@@ -558,9 +556,50 @@
         return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
     }
 
+    // FITUR IMPOR / PEMULIHAN DATA LANGSUNG DARI FILE EXCEL (.XLSX)
+    function imporDariExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                if (json && json.length > 0) {
+                    let importedList = json.map((row, index) => ({
+                        id: Date.now() + index,
+                        no_transaksi: row['No Transaksi'] || row['No Trx'] || `YNF-${Math.floor(100000 + Math.random() * 900000)}`,
+                        tanggal: row['Tanggal'] || new Date().toISOString().split('T')[0],
+                        nama: row['Pelanggan'] || 'Pelanggan',
+                        nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
+                        produk: row['Produk'] || 'Pulsa',
+                        paket: row['Paket'] || '-',
+                        nomor_token: row['Nomor Token'] || '',
+                        harga: Number(row['Harga Jual'] || row['Total'] || 0),
+                        status_pembayaran: row['Status'] || 'LUNAS',
+                        jatuh_tempo: row['Jatuh Tempo'] || ''
+                    }));
+
+                    localStorage.setItem('ynf_transactions', JSON.stringify(importedList));
+                    loadRekapLocal();
+                    showAlert(`✅ Berhasil memulihkan ${importedList.length} riwayat transaksi dari Excel!`, true);
+                } else {
+                    showAlert('❌ File Excel kosong atau format tidak sesuai.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('❌ Gagal membaca file Excel.', false);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
     function loadRekapLocal() {
         const transaksiList = ambilSemuaTransaksi();
-        
         const mulai = document.getElementById('filterMulai').value;
         const selesai = document.getElementById('filterSelesai').value;
         const status = document.getElementById('filterStatus').value;
@@ -641,40 +680,6 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan YNF");
         XLSX.writeFile(workbook, `Laporan-PPOB-YNF-${new Date().toISOString().split('T')[0]}.xlsx`);
         showAlert('✅ Berhasil diunduh ke Excel!', true);
-    }
-
-    // CADANGAN DATA JSON (BACKUP & RESTORE)
-    function backupDataJSON() {
-        const data = localStorage.getItem('ynf_transactions');
-        if (!data) return showAlert('❌ Tidak ada data untuk dibackup', false);
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Backup-YNF-PPOB-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        showAlert('✅ Backup data berhasil diunduh!', true);
-    }
-
-    function restoreDataJSON(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const parsed = JSON.parse(e.target.result);
-                if (Array.isArray(parsed)) {
-                    localStorage.setItem('ynf_transactions', JSON.stringify(parsed));
-                    loadRekapLocal();
-                    showAlert('✅ Data berhasil dipulihkan!', true);
-                } else {
-                    showAlert('❌ Format file backup tidak valid', false);
-                }
-            } catch (err) {
-                showAlert('❌ Gagal membaca file', false);
-            }
-        };
-        reader.readAsText(file);
     }
 
     function renderNotaView(item) {
@@ -807,7 +812,7 @@
         }
 
         teks += `Total: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
-                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
+                `Status: *${currentAllData || currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
 
         window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
     }
