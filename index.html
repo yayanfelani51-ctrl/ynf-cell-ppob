@@ -43,18 +43,6 @@
 
         .container { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.92); } 60% { opacity: 1; transform: scale(1.02); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 15px rgba(229, 178, 40, 0.15); } 50% { box-shadow: 0 0 30px rgba(229, 178, 40, 0.35); } 100% { box-shadow: 0 0 15px rgba(229, 178, 40, 0.15); } }
-
-        /* SPLASH SCREEN AMAN (TIDAK AKAN STUCK) */
-        #splashScreen {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: #030305; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.3s ease;
-        }
-
         /* LOGIN PAGE */
         #pageLogin { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px 10px; width: 100%; }
         .login-card {
@@ -77,17 +65,10 @@
         }
         .login-sub-title { font-size: 10px; color: var(--text-secondary); letter-spacing: 3.5px; text-transform: uppercase; font-weight: 800; margin-bottom: 28px; }
 
-        .btn-fp {
-            background: rgba(255, 215, 0, 0.12); color: var(--accent-gold);
-            border: 1px solid var(--card-border); margin-top: 14px;
-            display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800;
-        }
-
         .digital-clock-card {
             background: linear-gradient(135deg, rgba(22, 22, 35, 0.9), rgba(10, 10, 18, 0.98));
             backdrop-filter: blur(25px); border: 1px solid var(--card-border);
             border-radius: 26px; padding: 20px; margin-bottom: 16px; text-align: center;
-            animation: pulseGlow 5s infinite ease-in-out;
         }
         .clock-time {
             font-size: 38px; font-weight: 900;
@@ -102,7 +83,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px 20px; border-radius: 24px; margin-bottom: 16px;
         }
         .top-dash-header { display: flex; justify-content: space-between; align-items: center; }
-        .top-dash-brand { display: flex; align-items: center; gap: 14px; }
         .top-dash-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); }
         .top-dash-sub { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; }
         
@@ -111,7 +91,7 @@
             background: rgba(50, 215, 75, 0.15); padding: 7px 14px; border-radius: 22px; 
             border: 1px solid rgba(50, 215, 75, 0.3); display: flex; align-items: center; gap: 7px;
         }
-        .status-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; box-shadow: 0 0 12px var(--success); }
+        .status-dot { width: 7px; height: 7px; background: var(--success); border-radius: 50%; }
 
         .card { 
             background: var(--card-bg); backdrop-filter: blur(30px);
@@ -218,15 +198,9 @@
 </head>
 <body>
 
-<!-- SPLASH SCREEN AMAN (LANGSUNG HILANG DALAM 0.3 DETIK) -->
-<div id="splashScreen">
-    <h2 style="color: #ffd700; letter-spacing: 3px; font-weight: 900;">YNF CELL PPOB</h2>
-    <p style="color: #98989f; font-size: 11px; margin-top: 8px;">Memuat Sistem...</p>
-</div>
-
 <div class="container">
 
-    <!-- HALAMAN LOGIN -->
+    <!-- HALAMAN LOGIN (LANGSUNG TAMPIL TANPA SPLASH SCREEN) -->
     <div id="pageLogin">
         <div class="login-card">
             <div class="login-avatar">🔑</div>
@@ -420,15 +394,6 @@
 </div>
 
 <script>
-    // HILANGKAN SPLASH SCREEN LANGSUNG SECARA AMAN
-    window.addEventListener('DOMContentLoaded', () => {
-        const splash = document.getElementById('splashScreen');
-        if (splash) {
-            splash.style.opacity = '0';
-            setTimeout(() => { splash.style.display = 'none'; }, 200);
-        }
-    });
-
     let rekapDataList = [];
     let myChart = null;
 
@@ -721,4 +686,50 @@
     function downloadNotaPNG() {
         html2canvas(document.getElementById('notaPreview'), { backgroundColor: '#030305', scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'Nota-'
+            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'YNF') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function kirimNotaWA() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        let rawNo = String(currentLastData.nomor || '').replace(/[^0-9]/g, '');
+        let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : '62' + rawNo;
+
+        let teks = `*YNF CELL PPOB*\n` +
+                   `No Trx: ${currentLastData.no_transaksi}\n` +
+                   `Tanggal: ${formatTanggalIndo(currentLastData.tanggal)}\n` +
+                   `--------------------------------\n` +
+                   `Produk: ${currentLastData.produk}\n` +
+                   `Nama: ${currentLastData.nama}\n` +
+                   `ID: ${currentLastData.nomor}\n` +
+                   `Nominal: ${currentLastData.paket}\n`;
+
+        if (currentLastData.produk === 'Token PLN' && currentLastData.nomor_token) {
+            teks += `\n*TOKEN PLN:* \`${currentLastData.nomor_token}\`\n\n`;
+        }
+
+        teks += `Total: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
+    }
+
+    async function cetakPrinterBluetooth() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        if (!navigator.bluetooth) return alert('Browser tidak mendukung Bluetooth.');
+        try {
+            const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] });
+            const server = await device.gatt.connect();
+            const service = await server.primaryService;
+            const characteristic = await service.characteristic;
+            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTotal: Rp ${currentLastData.harga}\n`;
+            await characteristic.writeValue(new TextEncoder().encode(data));
+            showAlert('✅ Tercetak!', true);
+        } catch (err) { showAlert('❌ Gagal cetak', false); }
+    }
+</script>
+
+</body>
+</html>
