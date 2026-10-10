@@ -212,7 +212,7 @@
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label style="text-align:center;">MASUKKAN PIN ADMIN </label>
+                    <label style="text-align:center;">MASUKKAN PIN ADMIN (Default: 1234)</label>
                     <input type="password" id="pinInput" placeholder="••••" required style="text-align:center; font-size: 24px; letter-spacing: 8px;">
                 </div>
                 <button type="submit" id="btnLogin">🔓 Masuk Aplikasi</button>
@@ -376,8 +376,18 @@
                     </select>
                 </div>
                 <div class="grid-2">
-                    <button onclick="loadRekap()">🔍 Filter</button>
-                    <button class="btn-excel" onclick="eksporKeExcel()">📥 Excel</button>
+                    <button onclick="loadRekapLocal()">🔍 Filter</button>
+                    <button class="btn-excel" onclick="eksporKeExcel()">📥 Unduh Excel</button>
+                </div>
+            </div>
+
+            <!-- MENU CADANGAN DATA -->
+            <div class="card">
+                <div class="card-title">💾 Cadangan & Pemulihan Data</div>
+                <div class="grid-2">
+                    <button class="btn-excel" onclick="backupDataJSON()">📤 Backup Data</button>
+                    <button class="btn-print" onclick="document.getElementById('restoreFile').click()">📥 Pulihkan Data</button>
+                    <input type="file" id="restoreFile" style="display:none" accept=".json" onchange="restoreDataJSON(event)">
                 </div>
             </div>
 
@@ -423,7 +433,6 @@
     let rekapDataList = [];
     let myChart = null;
 
-    // Cek jika sudah pernah login sebelumnya di HP ini
     window.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('ynf_is_logged') === 'true') {
             document.getElementById('pageLogin').style.display = 'none';
@@ -493,18 +502,15 @@
     let currentLastData = null;
     document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
-    // VALIDASI PIN LOKAL (PIN DEFAULT: 1234 - Silakan ganti jika ingin PIN lain)
     document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const pin = document.getElementById('pinInput').value;
-        const benarPin = '1234'; // Anda bisa ubah PIN di sini
-
-        if (pin === benarPin) {
+        if (pin === '1234') {
             localStorage.setItem('ynf_is_logged', 'true');
             document.getElementById('pageLogin').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('bottomNav').style.display = 'flex';
-            showAlert('✅ Login Berhasil, Selamat Datang!', true);
+            showAlert('✅ Login Berhasil!', true);
             loadRekapLocal();
         } else {
             showAlert('❌ PIN Salah! (Gunakan 1234)', false);
@@ -512,10 +518,7 @@
         }
     });
 
-    function logout() { 
-        resetToLogin(); 
-        showAlert('🔒 Anda telah keluar.', true); 
-    }
+    function logout() { resetToLogin(); showAlert('🔒 Anda telah keluar.', true); }
 
     function bukaHalaman(hal) {
         document.getElementById('navTrx').classList.remove('active');
@@ -551,20 +554,30 @@
         return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tglStr;
     }
 
-    // PENYIMPANAN DATA TRANSAKSI LOKAL (LOCALSTORAGE)
     function ambilSemuaTransaksi() {
         return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
     }
 
     function loadRekapLocal() {
         const transaksiList = ambilSemuaTransaksi();
-        rekapDataList = transaksiList;
+        
+        const mulai = document.getElementById('filterMulai').value;
+        const selesai = document.getElementById('filterSelesai').value;
+        const status = document.getElementById('filterStatus').value;
 
-        let totalOmset = 0;
-        let totalLunas = 0;
-        let totalHutang = 0;
+        let filtered = transaksiList.filter(t => {
+            let matchStatus = (status === 'SEMUA' || t.status_pembayaran === status);
+            let matchDate = true;
+            if (mulai && selesai) {
+                matchDate = (t.tanggal >= mulai && t.tanggal <= selesai);
+            }
+            return matchStatus && matchDate;
+        });
 
-        transaksiList.forEach(t => {
+        rekapDataList = filtered;
+
+        let totalOmset = 0, totalLunas = 0, totalHutang = 0;
+        filtered.forEach(t => {
             const h = Number(t.harga) || 0;
             totalOmset += h;
             if (t.status_pembayaran === 'LUNAS') totalLunas += h;
@@ -574,11 +587,11 @@
         document.getElementById('sumOmset').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
         document.getElementById('sumLunas').innerText = 'Rp ' + totalLunas.toLocaleString('id-ID');
         document.getElementById('sumHutang').innerText = 'Rp ' + totalHutang.toLocaleString('id-ID');
-        renderSalesChart(transaksiList);
+        renderSalesChart(filtered);
 
         const tbody = document.getElementById('rekapTableBody');
-        if (transaksiList.length > 0) {
-            tbody.innerHTML = transaksiList.map((item, idx) => `
+        if (filtered.length > 0) {
+            tbody.innerHTML = filtered.map((item, idx) => `
                 <tr>
                     <td><small>${item.no_transaksi}</small></td>
                     <td>${item.tanggal}</td>
@@ -594,7 +607,7 @@
                 </tr>
             `).join('');
         } else {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Belum ada riwayat transaksi.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Tidak ada data transaksi.</td></tr>';
         }
     }
 
@@ -628,6 +641,40 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan YNF");
         XLSX.writeFile(workbook, `Laporan-PPOB-YNF-${new Date().toISOString().split('T')[0]}.xlsx`);
         showAlert('✅ Berhasil diunduh ke Excel!', true);
+    }
+
+    // CADANGAN DATA JSON (BACKUP & RESTORE)
+    function backupDataJSON() {
+        const data = localStorage.getItem('ynf_transactions');
+        if (!data) return showAlert('❌ Tidak ada data untuk dibackup', false);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Backup-YNF-PPOB-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        showAlert('✅ Backup data berhasil diunduh!', true);
+    }
+
+    function restoreDataJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (Array.isArray(parsed)) {
+                    localStorage.setItem('ynf_transactions', JSON.stringify(parsed));
+                    loadRekapLocal();
+                    showAlert('✅ Data berhasil dipulihkan!', true);
+                } else {
+                    showAlert('❌ Format file backup tidak valid', false);
+                }
+            } catch (err) {
+                showAlert('❌ Gagal membaca file', false);
+            }
+        };
+        reader.readAsText(file);
     }
 
     function renderNotaView(item) {
