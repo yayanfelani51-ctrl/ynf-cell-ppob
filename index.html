@@ -235,7 +235,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 10px;
         }
         .produk-item {
             background: rgba(255, 255, 255, 0.025);
@@ -450,11 +450,11 @@
         <!-- HALAMAN TRANSAKSI -->
         <div id="pageTransaksi">
             <div class="card">
-                <div class="card-title">⚡ Kategori Produk PPOB</div>
+                <div class="card-title">⚡ Pilih Kategori Produk PPOB</div>
                 
                 <!-- GRID PRODUK VISUAL -->
                 <div class="produk-grid">
-                    <div class="produk-item active" onclick="pilihProduk('Pulsa', this)">
+                    <div class="produk-item" onclick="pilihProduk('Pulsa', this)">
                         <span>📱</span>
                         <p>Pulsa</p>
                     </div>
@@ -483,10 +483,13 @@
                         <p>Lainnya</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="card-title">📝 Detail Transaksi & Pembayaran</div>
+            <!-- FORM DETAIL TRANSAKSI (MUNCUL SETELAH KLIK PRODUK) -->
+            <div class="card" id="formCard" style="display:none;">
+                <div class="card-title" id="formCardTitle">📝 Detail Transaksi & Pembayaran</div>
                 <form id="txForm">
-                    <input type="hidden" id="produk" value="Pulsa">
+                    <input type="hidden" id="produk" value="">
 
                     <div class="grid-2">
                         <div class="form-group">
@@ -850,11 +853,18 @@
         }
     }
 
-    // PILIH PRODUK
+    // PILIH PRODUK & MUNCULKAN FORM
     function pilihProduk(val, el) {
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
+        
         document.getElementById('produk').value = val;
+        document.getElementById('formCardTitle').innerText = `📝 Transaksi: ${val}`;
+        
+        // Tampilkan Form & Sembunyikan Struk Lama (jika ada)
+        document.getElementById('formCard').style.display = 'block';
+        document.getElementById('notaCard').style.display = 'none';
+        document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
 
         const labelNomor = document.getElementById('labelNomor');
         const inputNomor = document.getElementById('nomor');
@@ -864,8 +874,8 @@
         if (val === 'Tagihan PDAM') {
             labelNomor.innerText = 'ID Pelanggan PDAM';
             inputNomor.placeholder = 'Contoh: 1029384756';
-            labelPaket.innerText = 'Wilayah / Wilayah PDAM';
-            inputPaket.placeholder = 'Contoh: PDAM Kota / Kab. Tirta';
+            labelPaket.innerText = 'Wilayah / Deskripsi PDAM';
+            inputPaket.placeholder = 'Contoh: PDAM Kota / Bulanan';
         } else if (val === 'Token PLN') {
             labelNomor.innerText = 'ID Pelanggan / No Meter PLN';
             inputNomor.placeholder = 'Contoh: 541200982721';
@@ -980,7 +990,7 @@
             const tbody = document.getElementById('rekapTableBody');
 
             if (data.ok) {
-                rekapDataList = data.data; // Simpan daftar transaksi ke memori
+                rekapDataList = data.data;
                 document.getElementById('sumOmset').innerText = 'Rp ' + Number(data.ringkasan.totalOmset || 0).toLocaleString('id-ID');
                 document.getElementById('sumLunas').innerText = 'Rp ' + Number(data.ringkasan.totalLunas || 0).toLocaleString('id-ID');
                 document.getElementById('sumHutang').innerText = 'Rp ' + Number(data.ringkasan.totalHutang || 0).toLocaleString('id-ID');
@@ -1012,7 +1022,6 @@
         }
     }
 
-    // FUNGSI UNTUK MEMUNCULKAN STRUK DARI REKAP
     function tampilkanNotaDariRekap(index) {
         const item = rekapDataList[index];
         if (!item) return;
@@ -1055,8 +1064,8 @@
             rowJt.style.display = 'none';
         }
 
-        // Buka Halaman Transaksi & Scroll ke Struk
         bukaHalaman('transaksi');
+        document.getElementById('formCard').style.display = 'none'; // Sembunyikan form kasir
         document.getElementById('notaCard').style.display = 'block';
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
@@ -1168,7 +1177,9 @@
                     rowJt.style.display = 'none';
                 }
 
+                document.getElementById('formCard').style.display = 'none'; // Sembunyikan form setelah simpan
                 document.getElementById('notaCard').style.display = 'block';
+                document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
 
                 document.getElementById('nama').value = '';
                 document.getElementById('nomor').value = '';
@@ -1178,6 +1189,7 @@
                 document.getElementById('uang_bayar').value = '';
                 document.getElementById('kembalian').value = '';
                 document.getElementById('jatuh_tempo').value = '';
+                document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
 
             } else {
                 showAlert('❌ ' + (result.message || 'Gagal menyimpan transaksi'), false);
