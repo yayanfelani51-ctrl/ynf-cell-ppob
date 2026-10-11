@@ -128,11 +128,6 @@
         }
         input:focus, select:focus { outline: none; border-color: var(--accent-gold); background: rgba(0,0,0,0.85); }
 
-        input#nomor_token {
-            font-size: 22px; font-weight: 900; letter-spacing: 2.5px;
-            color: var(--accent-gold); text-align: center; background: rgba(255, 215, 0, 0.1);
-        }
-
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         button { 
@@ -170,10 +165,6 @@
         .n-title-box { margin-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 14px; text-align: center; }
         .n-brand { font-size: 22px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1.5px; }
         .n-subtitle { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; }
-        
-        .n-token-box { background: rgba(255, 215, 0, 0.1); border: 1.5px dashed var(--accent-gold); border-radius: 16px; padding: 14px; text-align: center; margin: 16px 0; }
-        .n-token-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 900; margin-bottom: 5px; }
-        .n-token-val { font-size: 18px; font-weight: 900; color: var(--accent-gold); letter-spacing: 2px; font-family: monospace; }
 
         .n-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; }
         .n-label { color: var(--text-secondary); width: 40%; font-weight: 700; }
@@ -258,50 +249,57 @@
                 </div>
             </div>
 
+            <!-- FORM DINAMIS -->
             <div class="card" id="formCard" style="display:none;">
                 <div class="card-title" id="formCardTitle">📝 Detail Transaksi & Pembayaran</div>
                 <form id="txForm">
                     <input type="hidden" id="produk" value="">
-
-                    <div class="grid-2">
-                        <div class="form-group"><label>Tanggal Transaksi</label><input type="date" id="tanggal" required></div>
-                        <div class="form-group"><label>7. Jatuh Tempo</label><input type="date" id="jatuh_tempo"></div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group"><label>1. Nama Pelanggan</label><input type="text" id="nama" placeholder="Nama Pelanggan" required></div>
+                    
+                    <!-- CONTAINER FORM UMUM -->
+                    <div id="formUmum">
+                        <div class="grid-2">
+                            <div class="form-group"><label>Tanggal Transaksi</label><input type="date" id="tanggal"></div>
+                            <div class="form-group"><label>Jatuh Tempo</label><input type="date" id="jatuh_tempo"></div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="nama" placeholder="Nama Pelanggan"></div>
+                            <div class="form-group"><label id="labelNomor">Nomor ID Pelanggan</label><input type="text" id="nomor" placeholder="No HP / ID" oninput="cariPelangganOtomatis(this.value)"></div>
+                        </div>
+                        <div class="form-group"><label id="labelPaket">Nominal / Paket</label><input type="text" id="paket" placeholder="Contoh: 10GB / 50rb"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Harga Modal (Rp)</label><input type="number" id="harga_modal" placeholder="50000"></div>
+                            <div class="form-group"><label>Harga Jual (Rp)</label><input type="number" id="harga" placeholder="53000"></div>
+                        </div>
                         <div class="form-group">
-                            <label id="labelNomor">2. Nomor ID Pelanggan</label>
-                            <input type="text" id="nomor" placeholder="085695019006" required oninput="cariPelangganOtomatis(this.value)">
+                            <label>Keterangan Status</label>
+                            <select id="status_pembayaran">
+                                <option value="LUNAS">✅ LUNAS</option>
+                                <option value="HUTANG">⚠️ HUTANG</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label id="labelPaket">3. Nominal Token / Paket</label>
-                        <input type="text" id="paket" placeholder="Contoh: Token 50rb / 100rb">
-                    </div>
-
-                    <div class="form-group" id="groupNomorToken" style="display:none;">
-                        <label style="color:var(--accent-gold);">4. NOMOR TOKEN PLN (Struk / Kwh)</label>
-                        <input type="text" id="nomor_token" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group"><label>5. Harga Modal (Rp)</label><input type="number" id="harga_modal" placeholder="50000"></div>
-                        <div class="form-group"><label>6. Harga Jual (Rp)</label><input type="number" id="harga" placeholder="53000" required oninput="hitungKembalian()"></div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group"><label>Uang Dibayar (Rp)</label><input type="number" id="uang_bayar" placeholder="60000" oninput="hitungKembalian()"></div>
-                        <div class="form-group"><label>Kembalian (Rp)</label><input type="text" id="kembalian" readonly placeholder="0" style="color: var(--accent-gold); font-weight:bold;"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>8. Keterangan Status</label>
-                        <select id="status_pembayaran">
-                            <option value="LUNAS">✅ LUNAS</option>
-                            <option value="HUTANG">⚠️ HUTANG</option>
-                        </select>
+                    <!-- CONTAINER KHUSUS TAGIHAN AIR / PDAM -->
+                    <div id="formPdam" style="display:none;">
+                        <input type="hidden" id="pdam_tanggal">
+                        <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="pdam_nama" placeholder="Nama Pelanggan Air"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>No ID</label><input type="text" id="pdam_nomor" placeholder="Nomor Sambungan Air"></div>
+                            <div class="form-group"><label>Asal PDAM</label><input type="text" id="pdam_asal" placeholder="Contoh: PDAM Surabaya"></div>
+                        </div>
+                        <div class="form-group"><label>Jumlah Tagihan</label><input type="number" id="pdam_tagihan" placeholder="Contoh: 75000" oninput="syncHargaPdam()"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>Harga Modal</label><input type="number" id="pdam_modal" placeholder="70000"></div>
+                            <div class="form-group"><label>Harga Jual</label><input type="number" id="pdam_jual" placeholder="75000"></div>
+                        </div>
+                        <div class="form-group"><label>Tanggal Jatuh Tempo</label><input type="date" id="pdam_jatuh_tempo"></div>
+                        <div class="form-group">
+                            <label>Keterangan Lunas atau Hutang</label>
+                            <select id="pdam_status">
+                                <option value="LUNAS">✅ LUNAS</option>
+                                <option value="HUTANG">⚠️ HUTANG</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button type="submit" id="btnSimpan">💾 Simpan & Cetak Struk</button>
@@ -322,16 +320,8 @@
                         <div class="n-row"><div class="n-label">Produk</div><div class="n-val" id="n_produk">-</div></div>
                         <div class="n-row"><div class="n-label">Pelanggan</div><div class="n-val" id="n_nama">-</div></div>
                         <div class="n-row"><div class="n-label">ID Pelanggan</div><div class="n-val" id="n_nomor">-</div></div>
-                        <div class="n-row"><div class="n-label">Nominal</div><div class="n-val" id="n_paket">-</div></div>
-
-                        <div id="n_token_wrapper" style="display:none;">
-                            <div class="n-token-box">
-                                <div class="n-token-label">Nomor Token PLN</div>
-                                <div class="n-token-val" id="n_nomor_token">0000-0000-0000-0000</div>
-                            </div>
-                        </div>
-
-                        <div class="n-row"><div class="n-label">Total Harga</div><div class="n-val" id="n_harga">Rp 0</div></div>
+                        <div class="n-row" id="n_row_asal" style="display:none;"><div class="n-label">Asal PDAM</div><div class="n-val" id="n_asal">-</div></div>
+                        <div class="n-row"><div class="n-label">Total / Tagihan</div><div class="n-val" id="n_harga">Rp 0</div></div>
                         <div class="n-row" id="n_row_jt" style="display:none;"><div class="n-label">Jatuh Tempo</div><div class="n-val-gold" id="n_jt">-</div></div>
 
                         <div class="n-divider"></div>
@@ -381,10 +371,8 @@
                 </div>
             </div>
 
-            <!-- MENU UTAMA BACKUP & RESTORE DATA JSON -->
             <div class="card">
                 <div class="card-title">💾 Menu Backup & Pemulihan Data</div>
-                <p style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">Simpan cadangan data transaksi secara rutin ke file lokal atau pulihkan data dari file sebelumnya:</p>
                 <div class="grid-2">
                     <button class="btn-excel" onclick="backupDataJSON()">📤 Backup Data</button>
                     <button class="btn-print" onclick="document.getElementById('restoreFile').click()">📥 Pulihkan Data</button>
@@ -392,10 +380,8 @@
                 </div>
             </div>
 
-            <!-- MENU PEMULIHAN DARI EXCEL -->
             <div class="card">
                 <div class="card-title">📥 Impor dari File Excel</div>
-                <p style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">Pilih file laporan Excel (`.xlsx`) Anda untuk memasukkan kembali riwayat transaksi:</p>
                 <button class="btn-excel" onclick="document.getElementById('excelFile').click()">📂 Pilih File Excel (.xlsx)</button>
                 <input type="file" id="excelFile" style="display:none" accept=".xlsx, .xls" onchange="imporDariExcel(event)">
             </div>
@@ -482,6 +468,11 @@
         localStorage.setItem('ynf_customers', JSON.stringify(savedCustomers));
     }
 
+    function syncHargaPdam() {
+        const tagihan = document.getElementById('pdam_tagihan').value;
+        document.getElementById('pdam_jual').value = tagihan;
+    }
+
     function pilihProduk(val, el) {
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         el.classList.add('active');
@@ -491,25 +482,21 @@
         document.getElementById('notaCard').style.display = 'none';
         document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
 
-        const groupToken = document.getElementById('groupNomorToken');
-        if (val === 'Token PLN') {
-            groupToken.style.display = 'block';
-            document.getElementById('labelNomor').innerText = '2. Nomor ID Pelanggan';
-            document.getElementById('labelPaket').innerText = '3. Nominal Token PLN';
-            document.getElementById('nomor').placeholder = '541200982721';
-            document.getElementById('paket').placeholder = 'Token 50rb / 100rb';
+        const formUmum = document.getElementById('formUmum');
+        const formPdam = document.getElementById('formPdam');
+
+        if (val === 'Tagihan PDAM') {
+            formUmum.style.display = 'none';
+            formPdam.style.display = 'block';
+            document.getElementById('pdam_tanggal').value = new Date().toISOString().split('T')[0];
         } else {
-            groupToken.style.display = 'none';
-            document.getElementById('nomor_token').value = '';
-            document.getElementById('labelNomor').innerText = '2. Nomor ID / HP Tujuan';
-            document.getElementById('labelPaket').innerText = '3. Paket / Nominal';
-            document.getElementById('nomor').placeholder = '085695019006';
-            document.getElementById('paket').placeholder = 'Contoh: Tsel Data 10GB';
+            formUmum.style.display = 'block';
+            formPdam.style.display = 'none';
+            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
         }
     }
 
     let currentLastData = null;
-    document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
 
     document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -550,13 +537,6 @@
         a.style.display = 'block'; setTimeout(() => { a.style.display = 'none'; }, 4000);
     }
 
-    function hitungKembalian() {
-        const harga = Number(document.getElementById('harga').value) || 0;
-        const bayar = Number(document.getElementById('uang_bayar').value) || 0;
-        const kembalian = bayar - harga;
-        document.getElementById('kembalian').value = bayar > 0 ? (kembalian >= 0 ? 'Rp ' + kembalian.toLocaleString('id-ID') : 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID')) : '';
-    }
-
     function formatTanggalIndo(tglStr) {
         if(!tglStr) return '-';
         const parts = tglStr.split('-');
@@ -567,7 +547,6 @@
         return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
     }
 
-    // FUNGSI BACKUP DATA KE JSON
     function backupDataJSON() {
         const data = localStorage.getItem('ynf_transactions');
         if (!data || JSON.parse(data).length === 0) return showAlert('❌ Tidak ada data untuk dibackup', false);
@@ -580,7 +559,6 @@
         showAlert('✅ Backup data berhasil diunduh!', true);
     }
 
-    // FUNGSI RESTORE DATA DARI JSON
     function restoreDataJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -623,7 +601,7 @@
                         nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
                         produk: row['Produk'] || 'Pulsa',
                         paket: row['Paket'] || '-',
-                        nomor_token: row['Nomor Token'] || '',
+                        asal_pdam: row['Asal PDAM'] || '',
                         harga: Number(row['Harga Jual'] || row['Total'] || 0),
                         status_pembayaran: row['Status'] || 'LUNAS',
                         jatuh_tempo: row['Jatuh Tempo'] || ''
@@ -716,7 +694,7 @@
         if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data untuk diekspor', false);
         const excelData = rekapDataList.map((item, index) => ({
             No: index + 1, 'No Transaksi': item.no_transaksi, Tanggal: item.tanggal, Pelanggan: item.nama,
-            'No HP / ID': item.nomor, Produk: item.produk, Paket: item.paket || '-', 'Nomor Token': item.nomor_token || '-',
+            'No HP / ID': item.nomor, 'Asal PDAM': item.asal_pdam || '-', Produk: item.produk, Paket: item.paket || '-',
             'Harga Jual': item.harga, Status: item.status_pembayaran, 'Jatuh Tempo': item.jatuh_tempo || '-'
         }));
         const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -732,14 +710,15 @@
         document.getElementById('n_produk').innerText = item.produk || '-';
         document.getElementById('n_nama').innerText = item.nama;
         document.getElementById('n_nomor').innerText = item.nomor;
-        document.getElementById('n_paket').innerText = item.paket || '-';
         document.getElementById('n_harga').innerText = 'Rp ' + Number(item.harga).toLocaleString('id-ID');
 
-        const tokenWrapper = document.getElementById('n_token_wrapper');
-        if (item.produk === 'Token PLN' && item.nomor_token) {
-            document.getElementById('n_nomor_token').innerText = item.nomor_token;
-            tokenWrapper.style.display = 'block';
-        } else { tokenWrapper.style.display = 'none'; }
+        const rowAsal = document.getElementById('n_row_asal');
+        if (item.produk === 'Tagihan PDAM' && item.asal_pdam) {
+            document.getElementById('n_asal').innerText = item.asal_pdam;
+            rowAsal.style.display = 'flex';
+        } else {
+            rowAsal.style.display = 'none';
+        }
 
         const statusBox = document.getElementById('n_status_box');
         const rowJt = document.getElementById('n_row_jt');
@@ -791,24 +770,47 @@
         const btn = document.getElementById('btnSimpan');
         btn.disabled = true; btn.innerText = 'Menyimpan...';
 
-        const nomorVal = document.getElementById('nomor').value;
-        const namaVal = document.getElementById('nama').value;
-        simpanPelangganKeLokal(nomorVal, namaVal);
+        const produkVal = document.getElementById('produk').value;
+        let newTrx = {};
 
-        const newTrx = {
-            id: Date.now(),
-            no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
-            tanggal: document.getElementById('tanggal').value,
-            jatuh_tempo: document.getElementById('jatuh_tempo').value,
-            nama: namaVal, 
-            nomor: nomorVal,
-            produk: document.getElementById('produk').value,
-            paket: document.getElementById('paket').value,
-            nomor_token: document.getElementById('nomor_token').value || '',
-            harga_modal: document.getElementById('harga_modal').value,
-            harga: document.getElementById('harga').value,
-            status_pembayaran: document.getElementById('status_pembayaran').value
-        };
+        if (produkVal === 'Tagihan PDAM') {
+            const namaVal = document.getElementById('pdam_nama').value;
+            const nomorVal = document.getElementById('pdam_nomor').value;
+            simpanPelangganKeLokal(nomorVal, namaVal);
+
+            newTrx = {
+                id: Date.now(),
+                no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
+                tanggal: document.getElementById('pdam_tanggal').value,
+                jatuh_tempo: document.getElementById('pdam_jatuh_tempo').value,
+                nama: namaVal,
+                nomor: nomorVal,
+                asal_pdam: document.getElementById('pdam_asal').value,
+                produk: 'Tagihan PDAM',
+                paket: 'Tagihan Air',
+                harga_modal: document.getElementById('pdam_modal').value,
+                harga: document.getElementById('pdam_jual').value,
+                status_pembayaran: document.getElementById('pdam_status').value
+            };
+        } else {
+            const namaVal = document.getElementById('nama').value;
+            const nomorVal = document.getElementById('nomor').value;
+            simpanPelangganKeLokal(nomorVal, namaVal);
+
+            newTrx = {
+                id: Date.now(),
+                no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
+                tanggal: document.getElementById('tanggal').value,
+                jatuh_tempo: document.getElementById('jatuh_tempo').value,
+                nama: namaVal,
+                nomor: nomorVal,
+                produk: produkVal,
+                paket: document.getElementById('paket').value,
+                harga_modal: document.getElementById('harga_modal').value,
+                harga: document.getElementById('harga').value,
+                status_pembayaran: document.getElementById('status_pembayaran').value
+            };
+        }
 
         let list = ambilSemuaTransaksi();
         list.unshift(newTrx);
@@ -821,7 +823,6 @@
         document.getElementById('notaCard').style.display = 'block';
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
         document.getElementById('txForm').reset();
-        document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
         document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
         
         btn.disabled = false; 
@@ -848,14 +849,13 @@
                    `--------------------------------\n` +
                    `Produk: ${currentLastData.produk}\n` +
                    `Nama: ${currentLastData.nama}\n` +
-                   `ID: ${currentLastData.nomor}\n` +
-                   `Nominal: ${currentLastData.paket}\n`;
+                   `ID Pelanggan: ${currentLastData.nomor}\n`;
 
-        if (currentLastData.produk === 'Token PLN' && currentLastData.nomor_token) {
-            teks += `\n*TOKEN PLN:* \`${currentLastData.nomor_token}\`\n\n`;
+        if (currentLastData.asal_pdam) {
+            teks += `Asal PDAM: ${currentLastData.asal_pdam}\n`;
         }
 
-        teks += `Total: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+        teks += `Jumlah Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
                 `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
 
         window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
@@ -869,7 +869,7 @@
             const server = await device.gatt.connect();
             const service = await server.primaryService;
             const characteristic = await service.characteristic;
-            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTotal: Rp ${currentLastData.harga}\n`;
+            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTagihan: Rp ${currentLastData.harga}\n`;
             await characteristic.writeValue(new TextEncoder().encode(data));
             showAlert('✅ Tercetak!', true);
         } catch (err) { showAlert('❌ Gagal cetak', false); }
