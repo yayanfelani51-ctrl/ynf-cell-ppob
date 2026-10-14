@@ -406,6 +406,9 @@
 </div>
 
 <script>
+    // URL Cloudflare Worker Anda
+    const API_URL = "https://sel-ynf-ppob.yayanfelani51.workers.dev/api/transaksi";
+
     const YNF_SVG_LOGO = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
             <path d="M 230 95 C 260 55, 330 35, 370 70 C 378 77, 368 88, 355 81 C 325 55, 270 70, 248 100 Z" fill="#e5b228" />
@@ -543,7 +546,19 @@
         return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tglStr;
     }
 
-    function ambilSemuaTransaksi() {
+    // FUNGSI UTAMA AMBIL DATA DARI CLOUDFLARE DATABASE
+    async function ambilSemuaTransaksi() {
+        try {
+            const res = await fetch(API_URL);
+            if (!res.ok) throw new Error("Gagal ambil dari server");
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                localStorage.setItem('ynf_transactions', JSON.stringify(data));
+                return data;
+            }
+        } catch (err) {
+            console.warn("Menggunakan cadangan lokal:", err);
+        }
         return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
     }
 
@@ -559,15 +574,17 @@
         showAlert('✅ Backup data berhasil diunduh!', true);
     }
 
-    function restoreDataJSON(event) {
+    async function restoreDataJSON(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             try {
                 const parsed = JSON.parse(e.target.result);
                 if (Array.isArray(parsed)) {
-                    localStorage.setItem('ynf_transactions', JSON.stringify(parsed));
+                    for (let item of parsed) {
+                        await simpanKeCloud(item);
+                    }
                     loadRekapLocal();
                     showAlert('✅ Data berhasil dipulihkan dari file JSON!', true);
                 } else {
@@ -580,11 +597,11 @@
         reader.readAsText(file);
     }
 
-    function imporDariExcel(event) {
+    async function imporDariExcel(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
@@ -593,23 +610,27 @@
                 const json = XLSX.utils.sheet_to_json(worksheet);
 
                 if (json && json.length > 0) {
-                    let importedList = json.map((row, index) => ({
-                        id: Date.now() + index,
-                        no_transaksi: row['No Transaksi'] || row['No Trx'] || `YNF-${Math.floor(100000 + Math.random() * 900000)}`,
-                        tanggal: row['Tanggal'] || new Date().toISOString().split('T')[0],
-                        nama: row['Pelanggan'] || 'Pelanggan',
-                        nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
-                        produk: row['Produk'] || 'Pulsa',
-                        paket: row['Paket'] || '-',
-                        asal_pdam: row['Asal PDAM'] || '',
-                        harga: Number(row['Harga Jual'] || row['Total'] || 0),
-                        status_pembayaran: row['Status'] || 'LUNAS',
-                        jatuh_tempo: row['Jatuh Tempo'] || ''
-                    }));
-
-                    localStorage.setItem('ynf_transactions', JSON.stringify(importedList));
+                    let count = 0;
+                    for (let [index, row] of json.entries()) {
+                        let item = {
+                            id: Date.now() + index,
+                            no_transaksi: row['No Transaksi'] || row['No Trx'] || `YNF-${Math.floor(100000 + Math.random() * 900000)}`,
+                            tanggal: row['Tanggal'] || new Date().toISOString().split('T')[0],
+                            nama: row['Pelanggan'] || 'Pelanggan',
+                            nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
+                            produk: row['Produk'] || 'Pulsa',
+                            paket: row['Paket'] || '-',
+                            asal_pdam: row['Asal PDAM'] || '',
+                            harga_modal: Number(row['Harga Modal'] || 0),
+                            harga: Number(row['Harga Jual'] || row['Total'] || 0),
+                            status_pembayaran: row['Status'] || 'LUNAS',
+                            jatuh_tempo: row['Jatuh Tempo'] || ''
+                        };
+                        await simpanKeCloud(item);
+                        count++;
+                    }
                     loadRekapLocal();
-                    showAlert(`✅ Berhasil memulihkan ${importedList.length} transaksi dari Excel!`, true);
+                    showAlert(`✅ Berhasil memulihkan ${count} transaksi dari Excel!`, true);
                 } else {
                     showAlert('❌ File Excel kosong.', false);
                 }
@@ -620,8 +641,8 @@
         reader.readAsArrayBuffer(file);
     }
 
-    function loadRekapLocal() {
-        const transaksiList = ambilSemuaTransaksi();
+    async function loadRekapLocal() {
+        const transaksiList = await ambilSemuaTransaksi();
         const mulai = document.getElementById('filterMulai').value;
         const selesai = document.getElementById('filterSelesai').value;
         const status = document.getElementById('filterStatus').value;
@@ -743,8 +764,24 @@
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function ubahStatusLokal(id) {
-        let list = ambilSemuaTransaksi();
+    // FUNGSI UTAMA SIMPAN DATA KE DATABASE CLOUDFLARE
+    async function simpanKeCloud(newTrx) {
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTrx)
+            });
+            let list = JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
+            list.unshift(newTrx);
+            localStorage.setItem('ynf_transactions', JSON.stringify(list));
+        } catch (err) {
+            console.error("Gagal simpan ke cloud:", err);
+        }
+    }
+
+    async function ubahStatusLokal(id) {
+        let list = await ambilSemuaTransaksi();
         list = list.map(item => {
             if (item.id === id) {
                 item.status_pembayaran = item.status_pembayaran === 'LUNAS' ? 'HUTANG' : 'LUNAS';
@@ -756,16 +793,16 @@
         showAlert('✅ Status pembayaran diperbarui', true);
     }
 
-    function hapusTransaksiLokal(id) {
+    async function hapusTransaksiLokal(id) {
         if (!confirm('Hapus transaksi ini?')) return;
-        let list = ambilSemuaTransaksi();
+        let list = await ambilSemuaTransaksi();
         list = list.filter(item => item.id !== id);
         localStorage.setItem('ynf_transactions', JSON.stringify(list));
         loadRekapLocal();
         showAlert('🗑️ Transaksi dihapus', true);
     }
 
-    document.getElementById('txForm').addEventListener('submit', (e) => {
+    document.getElementById('txForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSimpan');
         btn.disabled = true; btn.innerText = 'Menyimpan...';
@@ -812,9 +849,7 @@
             };
         }
 
-        let list = ambilSemuaTransaksi();
-        list.unshift(newTrx);
-        localStorage.setItem('ynf_transactions', JSON.stringify(list));
+        await simpanKeCloud(newTrx);
 
         showAlert('✅ Berhasil Disimpan!', true);
         currentLastData = newTrx;
