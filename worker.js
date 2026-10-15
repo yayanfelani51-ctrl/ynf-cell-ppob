@@ -13,7 +13,7 @@ export default {
     // 1. AMBIL SEMUA TRANSAKSI
     if (url.pathname === "/api/transaksi" && request.method === "GET") {
       try {
-        const ( results ) = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
+        const { results } = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
         return new Response(JSON.stringify(results), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -61,7 +61,7 @@ export default {
 async function prosesPenagihanHutang(env) {
   const today = new Date().toISOString().split('T')[0];
 
-  const ( results ) = await env.DB.prepare(
+  const { results } = await env.DB.prepare(
     `SELECT * FROM transactions 
      WHERE status_pembayaran = 'HUTANG' 
      AND jatuh_tempo != ? AND jatuh_tempo != ''`
