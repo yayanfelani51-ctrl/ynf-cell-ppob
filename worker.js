@@ -22,29 +22,55 @@ export default {
         });
       }
 
-      // HANDLE POST (Menyimpan Data Baru / Impor Excel)
+      // HANDLE POST (Menyimpan / Memperbarui Data)
       if (request.method === "POST" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const data = await request.json();
         
-        await env.DB.prepare(`
-          INSERT INTO transactions (id, no_transaksi, tanggal, jatuh_tempo, nama, nomor, produk, paket, asal_pdam, harga_modal, harga, status_pembayaran)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-          data.id || Date.now(),
-          data.no_transaksi || '-',
-          data.tanggal || '',
-          data.jatuh_tempo || '',
-          data.nama || '-',
-          data.nomor || '-',
-          data.produk || '-',
-          data.paket || '-',
-          data.asal_pdam || '',
-          Number(data.harga_modal) || 0,
-          Number(data.harga) || 0,
-          data.status_pembayaran || 'LUNAS'
-        ).run();
+        // Cek apakah data dengan ID tersebut sudah ada di database
+        const existing = await env.DB.prepare("SELECT id FROM transactions WHERE id = ?").bind(data.id).first();
 
-        return new Response(JSON.stringify({ success: true, message: "Transaksi berhasil disimpan" }), {
+        if (existing) {
+          // Jika sudah ada, lakukan UPDATE (misal ubah status lunas/hutang)
+          await env.DB.prepare(`
+            UPDATE transactions 
+            SET no_transaksi = ?, tanggal = ?, jatuh_tempo = ?, nama = ?, nomor = ?, produk = ?, paket = ?, asal_pdam = ?, harga_modal = ?, harga = ?, status_pembayaran = ?
+            WHERE id = ?
+          `).bind(
+            data.no_transaksi || '-',
+            data.tanggal || '',
+            data.jatuh_tempo || '',
+            data.nama || '-',
+            data.nomor || '-',
+            data.produk || '-',
+            data.paket || '-',
+            data.asal_pdam || '',
+            Number(data.harga_modal) || 0,
+            Number(data.harga) || 0,
+            data.status_pembayaran || 'LUNAS',
+            data.id
+          ).run();
+        } else {
+          // Jika belum ada, lakukan INSERT (transaksi baru / impor)
+          await env.DB.prepare(`
+            INSERT INTO transactions (id, no_transaksi, tanggal, jatuh_tempo, nama, nomor, produk, paket, asal_pdam, harga_modal, harga, status_pembayaran)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            data.id || Date.now(),
+            data.no_transaksi || '-',
+            data.tanggal || '',
+            data.jatuh_tempo || '',
+            data.nama || '-',
+            data.nomor || '-',
+            data.produk || '-',
+            data.paket || '-',
+            data.asal_pdam || '',
+            Number(data.harga_modal) || 0,
+            Number(data.harga) || 0,
+            data.status_pembayaran || 'LUNAS'
+          ).run();
+        }
+
+        return new Response(JSON.stringify({ success: true, message: "Data berhasil diproses" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
