@@ -549,12 +549,19 @@
     // FUNGSI UTAMA AMBIL DATA DARI CLOUDFLARE DATABASE
     async function ambilSemuaTransaksi() {
         try {
-            const res = await fetch(API_URL);
+            const res = await fetch(API_URL, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
             if (!res.ok) throw new Error("Gagal ambil dari server");
             const data = await res.json();
+            
             if (Array.isArray(data)) {
                 localStorage.setItem('ynf_transactions', JSON.stringify(data));
                 return data;
+            } else if (data && Array.isArray(data.results)) {
+                localStorage.setItem('ynf_transactions', JSON.stringify(data.results));
+                return data.results;
             }
         } catch (err) {
             console.warn("Menggunakan cadangan lokal:", err);
