@@ -580,11 +580,16 @@
             } else if (data && Array.isArray(data.results)) {
                 list = data.results;
             }
+            // Pastikan diurutkan berdasarkan ID atau waktu terbaru di atas
+            list.sort((a, b) => Number(b.id) - Number(a.id));
+            
             localStorage.setItem('ynf_transactions', JSON.stringify(list));
             return list;
         } catch (err) {
             console.warn("Menggunakan cadangan lokal:", err);
-            return JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
+            let localList = JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
+            localList.sort((a, b) => Number(b.id) - Number(a.id));
+            return localList;
         }
     }
 
@@ -664,6 +669,8 @@
             return matchStatus && matchDate;
         });
 
+        // Urutkan ulang agar data terbaru (ID terbesar) selalu di posisi paling atas tabel
+        filtered.sort((a, b) => Number(b.id) - Number(a.id));
         rekapDataList = filtered;
 
         let totalOmset = 0, totalLunas = 0, totalHutang = 0;
