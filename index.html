@@ -487,15 +487,20 @@
 
         const formUmum = document.getElementById('formUmum');
         const formPdam = document.getElementById('formPdam');
+        
+        // Tanggal otomatis hari ini
+        const todayStr = new Date().toISOString().split('T')[0];
 
         if (val === 'Tagihan PDAM') {
             formUmum.style.display = 'none';
             formPdam.style.display = 'block';
-            document.getElementById('pdam_tanggal').value = new Date().toISOString().split('T')[0];
+            document.getElementById('pdam_tanggal').value = todayStr;
+            document.getElementById('pdam_jatuh_tempo').value = todayStr;
         } else {
             formUmum.style.display = 'block';
             formPdam.style.display = 'none';
-            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = todayStr;
+            document.getElementById('jatuh_tempo').value = todayStr;
         }
     }
 
@@ -546,7 +551,7 @@
         return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tglStr;
     }
 
-    // FUNGSI UTAMA AMBIL DATA DARI CLOUDFLARE DATABASE
+    // FUNGSI AMBIL DATA DARI CLOUDFLARE DATABASE
     async function ambilSemuaTransaksi() {
         try {
             const res = await fetch(API_URL, {
@@ -771,19 +776,24 @@
         document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // FUNGSI UTAMA SIMPAN DATA KE DATABASE CLOUDFLARE
+    // FUNGSI SIMPAN DATA KE CLOUDFLARE DATABASE
     async function simpanKeCloud(newTrx) {
         try {
-            await fetch(API_URL, {
+            const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newTrx)
             });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Gagal menyimpan ke server");
+            }
             let list = JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
             list.unshift(newTrx);
             localStorage.setItem('ynf_transactions', JSON.stringify(list));
         } catch (err) {
             console.error("Gagal simpan ke cloud:", err);
+            showAlert('❌ Gagal sinkron ke server: ' + err.message, false);
         }
     }
 
