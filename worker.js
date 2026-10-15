@@ -10,10 +10,10 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { headers });
 
-    // 1. AMBIL SEMUA TRANSAKSI (Diperbarui agar urut berdasarkan waktu buat / id terbaru)
+    // 1. AMBIL SEMUA TRANSAKSI
     if (url.pathname === "/api/transaksi" && request.method === "GET") {
       try {
-        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY rowid DESC").all();
+        const ( results ) = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
         return new Response(JSON.stringify(results), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -24,13 +24,23 @@ export default {
     if (url.pathname === "/api/transaksi" && request.method === "POST") {
       try {
         const data = await request.json();
-        await env.DB.prepare(`
-          INSERT INTO transaksi (id, no_transaksi, tanggal, nama, nomor, produk, paket, nomor_token, asal_pdam, harga_modal, harga, status_pembayaran, jatuh_tempo)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-          String(data.id), data.no_transaksi, data.tanggal, data.nama, data.nomor,
-          data.produk, data.paket || '', data.nomor_token || '', data.asal_pdam || '',
-          data.harga_modal || 0, data.harga || 0, data.status_pembayaran, data.jatuh_tempo || ''
+        await env.DB.prepare(
+          `INSERT INTO transactions (id, no_transaksi, tanggal, nama, nomor, produk, paket, nomor_token, asal_pdam, harga_modal, harga, status_pembayaran, jatuh_tempo) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind(
+          String(data.id), 
+          data.no_transaksi, 
+          data.tanggal, 
+          data.nama, 
+          data.nomor, 
+          data.produk, 
+          data.paket || '', 
+          data.nomor_token || '', 
+          data.asal_pdam || '', 
+          data.harga_modal || 0, 
+          data.harga || 0, 
+          data.status_pembayaran, 
+          data.jatuh_tempo || ''
         ).run();
 
         return new Response(JSON.stringify({ success: true }), { headers });
@@ -51,11 +61,11 @@ export default {
 async function prosesPenagihanHutang(env) {
   const today = new Date().toISOString().split('T')[0];
 
-  const { results } = await env.DB.prepare(`
-    SELECT * FROM transaksi 
-    WHERE status_pembayaran = 'HUTANG' 
-    AND jatuh_tempo <= ? AND jatuh_tempo != ''
-  `).bind(today).all();
+  const ( results ) = await env.DB.prepare(
+    `SELECT * FROM transactions 
+     WHERE status_pembayaran = 'HUTANG' 
+     AND jatuh_tempo != ? AND jatuh_tempo != ''`
+  ).bind(today).all();
 
   if (!results || results.length === 0) return;
 
@@ -65,8 +75,8 @@ async function prosesPenagihanHutang(env) {
     let rawNo = String(item.nomor).replace(/[^0-9]/g, '');
     let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : rawNo;
 
-    let pesan = `*PENGINGAT TAGIHAN YNF CELL*\n\n` +
-      `Halo *${item.nama}*,\n` +
+    let pesan = `PENGINGAT TAGIHAN YNF CELL\n\n` +
+      `Halo ${item.nama},\n` +
       `Mengingatkan transaksi Anda di YNF CELL:\n` +
       `- No Trx: ${item.no_transaksi}\n` +
       `- Produk: ${item.produk}\n` +
@@ -79,8 +89,8 @@ async function prosesPenagihanHutang(env) {
         method: "POST",
         headers: { "Authorization": env.FONNTE_TOKEN },
         body: new URLSearchParams({
-          "target": noHp,
-          "message": pesan
+          target: noHp,
+          message: pesan
         })
       });
     }
