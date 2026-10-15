@@ -5,7 +5,7 @@ export default {
 
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
@@ -26,11 +26,9 @@ export default {
       if (request.method === "POST" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const data = await request.json();
         
-        // Cek apakah data dengan ID tersebut sudah ada di database
         const existing = await env.DB.prepare("SELECT id FROM transactions WHERE id = ?").bind(data.id).first();
 
         if (existing) {
-          // Jika sudah ada, lakukan UPDATE (misal ubah status lunas/hutang)
           await env.DB.prepare(`
             UPDATE transactions 
             SET no_transaksi = ?, tanggal = ?, jatuh_tempo = ?, nama = ?, nomor = ?, produk = ?, paket = ?, asal_pdam = ?, harga_modal = ?, harga = ?, status_pembayaran = ?
@@ -50,7 +48,6 @@ export default {
             data.id
           ).run();
         } else {
-          // Jika belum ada, lakukan INSERT (transaksi baru / impor)
           await env.DB.prepare(`
             INSERT INTO transactions (id, no_transaksi, tanggal, jatuh_tempo, nama, nomor, produk, paket, asal_pdam, harga_modal, harga, status_pembayaran)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -71,6 +68,23 @@ export default {
         }
 
         return new Response(JSON.stringify({ success: true, message: "Data berhasil diproses" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      // HANDLE DELETE (Menghapus Transaksi)
+      if (request.method === "DELETE" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
+        const data = await request.json();
+        if (!data.id) {
+          return new Response(JSON.stringify({ error: "ID tidak valid" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        await env.DB.prepare("DELETE FROM transactions WHERE id = ?").bind(data.id).run();
+
+        return new Response(JSON.stringify({ success: true, message: "Transaksi berhasil dihapus" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
