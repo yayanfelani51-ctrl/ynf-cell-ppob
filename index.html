@@ -152,8 +152,8 @@
         table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
         th, td { padding: 14px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; vertical-align: middle; }
         th { color: var(--text-secondary); background: rgba(255,255,255,0.03); text-transform: uppercase; font-size: 9px; font-weight: 900; }
-        .badge-lunas { background: rgba(50, 215, 75, 0.18); color: var(--success); border: 1px solid rgba(50, 215, 75, 0.35); padding: 5px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; }
-        .badge-hutang { background: rgba(255, 69, 58, 0.18); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.35); padding: 5px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; }
+        .badge-lunas { background: rgba(50, 215, 75, 0.18); color: var(--success); border: 1px solid rgba(50, 215, 75, 0.35); padding: 5px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; cursor: pointer; }
+        .badge-hutang { background: rgba(255, 69, 58, 0.18); color: var(--danger); border: 1px solid rgba(255, 69, 58, 0.35); padding: 5px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; cursor: pointer; }
         .action-btns { display: flex; gap: 6px; align-items: center; }
 
         #notaContainer { display: flex; justify-content: center; margin-bottom: 16px; }
@@ -436,7 +436,6 @@
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('bottomNav').style.display = 'flex';
             
-            // Set default filter awal bulan sampai hari ini
             const today = new Date().toISOString().split('T')[0];
             const firstDay = today.substring(0, 8) + '01';
             document.getElementById('filterMulai').value = firstDay;
@@ -493,7 +492,13 @@
 
         const formUmum = document.getElementById('formUmum');
         const formPdam = document.getElementById('formPdam');
-        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Memastikan tanggal otomatis selalu terisi tanggal hari ini (Real-time local date)
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
 
         if (val === 'Tagihan PDAM') {
             formUmum.style.display = 'none';
@@ -769,8 +774,25 @@
     }
 
     async function ubahStatusLokal(id) {
-        // Implementasi ubah status lokal / sinkronisasi jika diperlukan
-        loadRekapLocal();
+        let transaksiList = await ambilSemuaTransaksi();
+        let target = transaksiList.find(t => t.id === id);
+        if (!target) return showAlert('❌ Transaksi tidak ditemukan', false);
+
+        target.status_pembayaran = target.status_pembayaran === 'LUNAS' ? 'HUTANG' : 'LUNAS';
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(target)
+            });
+            if (!res.ok) throw new Error("Gagal memperbarui status di server");
+
+            showAlert(`✅ Status diubah menjadi ${target.status_pembayaran}!`, true);
+            loadRekapLocal();
+        } catch (err) {
+            showAlert('❌ Gagal mengubah status: ' + err.message, false);
+        }
     }
 
     async function hapusTransaksiLokal(id) {
