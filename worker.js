@@ -1,5 +1,4 @@
 export default {
-  // 1. ROUTE UTAMA APLIKASI
   async fetch(request, env) {
     const url = new URL(request.url);
     const headers = {
@@ -11,17 +10,17 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { headers });
 
-    // AMBIL SEMUA TRANSAKSI
+    // 1. AMBIL SEMUA TRANSAKSI UNTUK REKAPAN
     if (url.pathname === "/api/transaksi" && request.method === "GET") {
       try {
-        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY tanggal DESC, created_at DESC").all();
+        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY tanggal DESC").all();
         return new Response(JSON.stringify(results), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
       }
     }
 
-    // SIMPAN TRANSAKSI BARU
+    // 2. SIMPAN TRANSAKSI BARU DARI APLIKASI KASIR
     if (url.pathname === "/api/transaksi" && request.method === "POST") {
       try {
         const data = await request.json();
@@ -43,17 +42,15 @@ export default {
     return new Response("Not Found", { status: 404 });
   },
 
-  // 2. JADWAL PENAGIHAN OTOMATIS TIAP JAM 8 PAGI
   async scheduled(event, env, ctx) {
     ctx.waitUntil(prosesPenagihanHutang(env));
   }
 };
 
-// FUNGSI PROSES CEK DATABASE & KIRIM WA
+// FUNGSI PENAGIHAN OTOMATIS WHATSAPP
 async function prosesPenagihanHutang(env) {
   const today = new Date().toISOString().split('T')[0];
 
-  // Cari transaksi yang statusnya HUTANG dan tanggal jatuh temponya hari ini atau lewat
   const { results } = await env.DB.prepare(`
     SELECT * FROM transaksi 
     WHERE status_pembayaran = 'HUTANG' 
