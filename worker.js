@@ -3,7 +3,6 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // Tambahkan Header CORS agar bisa diakses dari browser/aplikasi HP
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -15,7 +14,7 @@ export default {
     }
 
     try {
-      // HANDLE METHOD GET (Menampilkan Data)
+      // HANDLE GET (Mengambil Data)
       if (request.method === "GET" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const { results } = await env.DB.prepare("SELECT * FROM transactions ORDER BY id DESC").all();
         return new Response(JSON.stringify(results || []), {
@@ -23,7 +22,7 @@ export default {
         });
       }
 
-      // HANDLE METHOD POST (Menyimpan Data Transaksi Baru)
+      // HANDLE POST (Menyimpan Data Baru / Impor Excel)
       if (request.method === "POST" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const data = await request.json();
         
@@ -40,8 +39,8 @@ export default {
           data.produk || '-',
           data.paket || '-',
           data.asal_pdam || '',
-          data.harga_modal || 0,
-          data.harga || 0,
+          Number(data.harga_modal) || 0,
+          Number(data.harga) || 0,
           data.status_pembayaran || 'LUNAS'
         ).run();
 
