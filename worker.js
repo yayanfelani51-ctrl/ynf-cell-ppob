@@ -14,7 +14,7 @@ export default {
     }
 
     try {
-      // HANDLE GET (Mengambil Data)
+      // HANDLE GET (Mengambil Data - Urutkan dari ID terbesar / terbaru)
       if (request.method === "GET" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const { results } = await env.DB.prepare("SELECT * FROM transactions ORDER BY id DESC").all();
         return new Response(JSON.stringify(results || []), {
@@ -25,7 +25,6 @@ export default {
       // HANDLE POST (Menyimpan / Memperbarui Data)
       if (request.method === "POST" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const data = await request.json();
-        
         const existing = await env.DB.prepare("SELECT id FROM transactions WHERE id = ?").bind(data.id).first();
 
         if (existing) {
@@ -72,19 +71,11 @@ export default {
         });
       }
 
-      // HANDLE DELETE (Menghapus Transaksi)
+      // HANDLE DELETE
       if (request.method === "DELETE" && (path === "/" || path === "/transaksi" || path === "/api/transaksi")) {
         const data = await request.json();
-        if (!data.id) {
-          return new Response(JSON.stringify({ error: "ID tidak valid" }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" }
-          });
-        }
-
         await env.DB.prepare("DELETE FROM transactions WHERE id = ?").bind(data.id).run();
-
-        return new Response(JSON.stringify({ success: true, message: "Transaksi berhasil dihapus" }), {
+        return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
       }
