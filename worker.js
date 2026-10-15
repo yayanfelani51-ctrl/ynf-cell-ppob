@@ -10,11 +10,10 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { headers });
 
-    // 1. AMBIL SEMUA TRANSAKSI
-    if (url.pathname === "/api/transaksi" && request.method === "GET") {
+    // 1. AMBIL SEMUA TRANSAKSI (Mendukung / , /transaksi , dan /api/transaksi)
+    if ((url.pathname === "/" || url.pathname === "/transaksi" || url.pathname === "/api/transaksi") && request.method === "GET") {
       try {
         const data = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
-        // Mengambil properti .results dari objek D1 untuk menampilkan data riwayat
         return new Response(JSON.stringify(data.results || []), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -22,7 +21,7 @@ export default {
     }
 
     // 2. SIMPAN TRANSAKSI BARU DARI APLIKASI KASIR
-    if (url.pathname === "/api/transaksi" && request.method === "POST") {
+    if ((url.pathname === "/transaksi" || url.pathname === "/api/transaksi") && request.method === "POST") {
       try {
         const data = await request.json();
         await env.DB.prepare(
