@@ -493,7 +493,6 @@
         const formUmum = document.getElementById('formUmum');
         const formPdam = document.getElementById('formPdam');
         
-        // Memastikan tanggal otomatis selalu terisi tanggal hari ini (Real-time local date)
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -796,8 +795,22 @@
     }
 
     async function hapusTransaksiLokal(id) {
-        if (!confirm('Hapus transaksi ini?')) return;
-        loadRekapLocal();
+        if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            
+            if (!res.ok) throw new Error("Gagal menghapus dari server");
+
+            showAlert('🗑️ Transaksi berhasil dihapus!', true);
+            loadRekapLocal();
+        } catch (err) {
+            showAlert('❌ Gagal menghapus transaksi: ' + err.message, false);
+        }
     }
 
     document.getElementById('txForm').addEventListener('submit', async (e) => {
