@@ -1,143 +1,91 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    }
-  });
-}
-
-const DEFAULT_PIN = "654321";
-
 export default {
-  async fetch(req, env) {
-    if (req.method === 'OPTIONS') {
-      return json({ ok: true });
+  // 1. ROUTE UTAMA APLIKASI
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const headers = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Content-Type": "application/json"
+    };
+
+    if (request.method === "OPTIONS") return new Response(null, { headers });
+
+    // AMBIL SEMUA TRANSAKSI
+    if (url.pathname === "/api/transaksi" && request.method === "GET") {
+      try {
+        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY tanggal DESC, created_at DESC").all();
+        return new Response(JSON.stringify(results), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      }
     }
 
-    try {
-      if (!env.DB) {
-        return json({ ok: false, message: 'Database D1 belum terhubung.' }, 500);
-      }
-
-      await env.DB.prepare(`
-        CREATE TABLE IF NOT EXISTS transaksi (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          no_transaksi TEXT NOT NULL UNIQUE,
-          tanggal TEXT NOT NULL,
-          produk TEXT NOT NULL,
-          nama TEXT NOT NULL,
-          nomor TEXT NOT NULL,
-          paket TEXT,
-          harga REAL NOT NULL,
-          harga_modal REAL DEFAULT 0,
-          status_pembayaran TEXT NOT NULL,
-          jatuh_tempo TEXT,
-          dibuat_pada TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-      `).run();
-
-      const url = new URL(req.url);
-      const path = url.pathname;
-
-      // 1. ENDPOINT LOGIN
-      if (path === '/api/login' && req.method === 'POST') {
-        const b = await req.json();
-        const pinInput = String(b.pin || '').trim();
-
-        if (pinInput === DEFAULT_PIN) {
-          return json({ ok: true, message: 'Login berhasil!' });
-        } else {
-          return json({ ok: false, message: 'PIN / Kata Sandi salah!' }, 401);
-        }
-      }
-
-      // 2. ENDPOINT HAPUS TRANSAKSI (DELETE)
-      if (path === '/api/transaksi' && req.method === 'DELETE') {
-        const b = await req.json();
-        const id = b.id;
-
-        if (!id) {
-          return json({ ok: false, message: 'ID Transaksi wajib diisi.' }, 400);
-        }
-
-        await env.DB.prepare('DELETE FROM transaksi WHERE id = ?').bind(id).run();
-
-        return json({ ok: true, message: 'Transaksi berhasil dihapus!' });
-      }
-
-      // 3. ENDPOINT UBAH STATUS (PUT)
-      if (path === '/api/transaksi/status' && req.method === 'PUT') {
-        const b = await req.json();
-        const id = b.id;
-        const status = String(b.status_pembayaran || 'LUNAS').toUpperCase();
-
-        if (!id) {
-          return json({ ok: false, message: 'ID Transaksi wajib diisi.' }, 400);
-        }
-
+    // SIMPAN TRANSAKSI BARU
+    if (url.pathname === "/api/transaksi" && request.method === "POST") {
+      try {
+        const data = await request.json();
         await env.DB.prepare(`
-          UPDATE transaksi SET status_pembayaran = ? WHERE id = ?
-        `).bind(status, id).run();
+          INSERT INTO transaksi (id, no_transaksi, tanggal, nama, nomor, produk, paket, nomor_token, asal_pdam, harga_modal, harga, status_pembayaran, jatuh_tempo)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          String(data.id), data.no_transaksi, data.tanggal, data.nama, data.nomor,
+          data.produk, data.paket || '', data.nomor_token || '', data.asal_pdam || '',
+          data.harga_modal || 0, data.harga || 0, data.status_pembayaran, data.jatuh_tempo || ''
+        ).run();
 
-        return json({ ok: true, message: 'Status pembayaran berhasil diperbarui!' });
+        return new Response(JSON.stringify({ success: true }), { headers });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
       }
-
-      // 4. ENDPOINT SIMPAN TRANSAKSI (POST)
-      if (path === '/api/transaksi' && req.method === 'POST') {
-        let b = await req.json();
-
-        const nama = String(b.nama || '').trim();
-        const nomor = String(b.nomor || '').trim();
-        const produk = String(b.produk || 'Pulsa').trim();
-        const paket = String(b.paket || '').trim();
-        const harga = Number(String(b.harga || 0).replace(/[^0-9]/g, '')) || 0;
-        const harga_modal = Number(String(b.harga_modal || 0).replace(/[^0-9]/g, '')) || 0;
-        const status_pembayaran = String(b.status_pembayaran || 'LUNAS').toUpperCase();
-        const tanggal = b.tanggal || new Date().toISOString().split('T')[0];
-        const jatuh_tempo = b.jatuh_tempo || '';
-
-        if (!nama || !nomor || harga <= 0) {
-          return json({ ok: false, message: 'Harap lengkapi data dengan benar.' }, 400);
-        }
-
-        const no_transaksi = 'YNF-' + tanggal.replace(/-/g, '') + '-' + Math.floor(10000000 + Math.random() * 90000000);
-
-        const result = await env.DB.prepare(`
-          INSERT INTO transaksi (no_transaksi, tanggal, produk, nama, nomor, paket, harga, harga_modal, status_pembayaran, jatuh_tempo)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(no_transaksi, tanggal, produk, nama, nomor, paket, harga, harga_modal, status_pembayaran, jatuh_tempo).run();
-
-        return json({
-          ok: true,
-          message: 'Transaksi berhasil disimpan!',
-          no_transaksi: no_transaksi,
-          id: result.meta.last_row_id
-        }, 201);
-      }
-
-      // 5. ENDPOINT AMBIL REKAP (GET)
-      if (path === '/api/transaksi' && req.method === 'GET') {
-        const rows = await env.DB.prepare('SELECT * FROM transaksi ORDER BY id DESC LIMIT 100').all();
-        const data = rows.results || [];
-
-        const totalOmset = data.reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
-        const totalLunas = data.filter(i => i.status_pembayaran === 'LUNAS').reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
-        const totalHutang = data.filter(i => i.status_pembayaran === 'HUTANG').reduce((acc, i) => acc + (Number(i.harga) || 0), 0);
-
-        return json({
-          ok: true,
-          data: data,
-          ringkasan: { totalOmset, totalLunas, totalHutang }
-        });
-      }
-
-      return env.ASSETS.fetch(req);
-    } catch (err) {
-      return json({ ok: false, message: 'Server Error: ' + err.message }, 500);
     }
+
+    return new Response("Not Found", { status: 404 });
+  },
+
+  // 2. JADWAL PENAGIHAN OTOMATIS TIAP JAM 8 PAGI
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(prosesPenagihanHutang(env));
   }
 };
+
+// FUNGSI PROSES CEK DATABASE & KIRIM WA
+async function prosesPenagihanHutang(env) {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Cari transaksi yang statusnya HUTANG dan tanggal jatuh temponya hari ini atau lewat
+  const { results } = await env.DB.prepare(`
+    SELECT * FROM transaksi 
+    WHERE status_pembayaran = 'HUTANG' 
+    AND jatuh_tempo <= ? AND jatuh_tempo != ''
+  `).bind(today).all();
+
+  if (!results || results.length === 0) return;
+
+  for (let item of results) {
+    if (!item.nomor) continue;
+
+    let rawNo = String(item.nomor).replace(/[^0-9]/g, '');
+    let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : rawNo;
+
+    let pesan = `*PENGINGAT TAGIHAN YNF CELL*\n\n` +
+      `Halo *${item.nama}*,\n` +
+      `Mengingatkan transaksi Anda di YNF CELL:\n` +
+      `- No Trx: ${item.no_transaksi}\n` +
+      `- Produk: ${item.produk}\n` +
+      `- Total Tagihan: Rp ${Number(item.harga).toLocaleString('id-ID')}\n` +
+      `- Tanggal Jatuh Tempo: ${item.jatuh_tempo}\n\n` +
+      `Mohon untuk melakukan penyelesaian pembayaran. Terima kasih! 🙏`;
+
+    if (env.FONNTE_TOKEN) {
+      await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: { "Authorization": env.FONNTE_TOKEN },
+        body: new URLSearchParams({
+          "target": noHp,
+          "message": pesan
+        })
+      });
+    }
+  }
+}
