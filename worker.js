@@ -13,8 +13,9 @@ export default {
     // 1. AMBIL SEMUA TRANSAKSI
     if (url.pathname === "/api/transaksi" && request.method === "GET") {
       try {
-        const { results } = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
-        return new Response(JSON.stringify(results), { headers });
+        const data = await env.DB.prepare("SELECT * FROM transactions ORDER BY rowid DESC").all();
+        // Mengambil properti .results dari objek D1 untuk menampilkan data riwayat
+        return new Response(JSON.stringify(data.results || []), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
       }
@@ -61,13 +62,14 @@ export default {
 async function prosesPenagihanHutang(env) {
   const today = new Date().toISOString().split('T')[0];
 
-  const { results } = await env.DB.prepare(
+  const data = await env.DB.prepare(
     `SELECT * FROM transactions 
      WHERE status_pembayaran = 'HUTANG' 
      AND jatuh_tempo != ? AND jatuh_tempo != ''`
   ).bind(today).all();
 
-  if (!results || results.length === 0) return;
+  const results = data.results || [];
+  if (results.length === 0) return;
 
   for (let item of results) {
     if (!item.nomor) continue;
