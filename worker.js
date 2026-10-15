@@ -10,10 +10,10 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { headers });
 
-    // 1. AMBIL SEMUA TRANSAKSI UNTUK REKAPAN
+    // 1. AMBIL SEMUA TRANSAKSI (Diperbarui agar urut berdasarkan waktu buat / id terbaru)
     if (url.pathname === "/api/transaksi" && request.method === "GET") {
       try {
-        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY tanggal DESC").all();
+        const { results } = await env.DB.prepare("SELECT * FROM transaksi ORDER BY rowid DESC").all();
         return new Response(JSON.stringify(results), { headers });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
