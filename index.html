@@ -407,9 +407,9 @@
 <script>
     const API_URL = "https://sel-ynf-ppob.yayanfelani51.workers.dev/api/transaksi";
 
-    // LOGO EMBLEM LINGKARAN EMAS MEWAH (YNF CELL)
+    // LOGO EMBLEM LINGKARAN EMAS MEWAH DENGAN TEKS YNF & YNF CELL LENGKAP
     const YNF_EMBLEM_LOGO = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
             <defs>
                 <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#fff2aa" />
@@ -417,15 +417,21 @@
                     <stop offset="100%" stop-color="#996515" />
                 </linearGradient>
             </defs>
-            <rect width="300" height="300" fill="#030305"/>
-            <circle cx="150" cy="150" r="135" fill="none" stroke="url(#gold)" stroke-width="6"/>
-            <circle cx="150" cy="150" r="122" fill="none" stroke="url(#gold)" stroke-width="1.5" opacity="0.5"/>
-            <!-- Simbol HP & Sinyal Minimalis di atas YNF -->
-            <path d="M 130 85 Q 150 70 170 85" fill="none" stroke="url(#gold)" stroke-width="3.5" stroke-linecap="round"/>
-            <rect x="138" y="92" width="24" height="38" rx="4" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
-            <!-- Huruf YNF Artistic -->
-            <text x="150" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="76" fill="url(#gold)" letter-spacing="2" text-anchor="middle">YNF</text>
-            <text x="150" y="238" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="#d0d0d8" letter-spacing="8" text-anchor="middle">YNF CELL</text>
+            <rect width="400" height="400" fill="#030305"/>
+            <!-- Lingkaran Luar & Dalam Emblem -->
+            <circle cx="200" cy="200" r="175" fill="none" stroke="url(#gold)" stroke-width="8"/>
+            <circle cx="200" cy="200" r="158" fill="none" stroke="url(#gold)" stroke-width="2" opacity="0.6"/>
+            
+            <!-- Simbol HP & Sinyal Mewah di Atas -->
+            <path d="M 165 75 Q 200 55 235 75" fill="none" stroke="url(#gold)" stroke-width="4.5" stroke-linecap="round"/>
+            <rect x="182" y="84" width="36" height="54" rx="6" fill="none" stroke="url(#gold)" stroke-width="3.5"/>
+            <circle cx="200" cy="128" r="2.5" fill="url(#gold)"/>
+
+            <!-- Tulisan YNF Besar di Tengah -->
+            <text x="200" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="88" fill="url(#gold)" letter-spacing="4" text-anchor="middle">YNF</text>
+            
+            <!-- Tulisan YNF CELL di Bagian Bawah Lingkaran -->
+            <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#f0f0f5" letter-spacing="12" text-anchor="middle">YNF CELL</text>
         </svg>
     `;
 
