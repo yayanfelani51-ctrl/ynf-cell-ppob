@@ -55,6 +55,7 @@
             border-radius: 50%; overflow: hidden; border: 2px solid var(--accent-gold);
             box-shadow: 0 0 25px rgba(229, 178, 40, 0.35); background: #000; display: flex; align-items: center; justify-content: center;
         }
+        .login-avatar svg, .top-dash-logo svg, .n-logo-box svg { width: 100%; height: 100%; display: block; }
         
         .login-brand-title {
             font-size: 26px; font-weight: 900;
@@ -83,7 +84,7 @@
         }
         .top-dash-header { display: flex; justify-content: space-between; align-items: center; }
         .top-dash-brand { display: flex; align-items: center; gap: 14px; }
-        .top-dash-logo { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); box-shadow: 0 0 12px rgba(229,178,40,0.4); display: flex; align-items: center; justify-content: center; background: #000; }
+        .top-dash-logo { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); box-shadow: 0 0 12px rgba(229,178,40,0.4); display: flex; align-items: center; justify-content: center; background: #000; flex-shrink: 0; }
         .top-dash-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); }
         .top-dash-sub { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; }
         
@@ -160,7 +161,7 @@
             background: #030305; color: #ffffff; width: 330px; padding: 30px 26px; border-radius: 28px;
             border: 1.5px solid var(--accent-glow); box-shadow: 0 0 45px rgba(229, 178, 40, 0.25);
         }
-        .n-logo-box { width: 75px; height: 75px; margin: 0 auto 10px auto; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; background: #000; }
+        .n-logo-box { width: 80px; height: 80px; margin: 0 auto 10px auto; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; background: #000; }
         .n-title-box { margin-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 14px; text-align: center; }
         .n-brand { font-size: 22px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1.5px; }
         .n-subtitle { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; }
@@ -407,42 +408,50 @@
 <script>
     const API_URL = "https://sel-ynf-ppob.yayanfelani51.workers.dev/api/transaksi";
 
-    // LOGO EMBLEM LINGKARAN EMAS MEWAH DENGAN TEKS YNF & YNF CELL LENGKAP
+    // LOGO EMBLEM LINGKARAN EMAS MEWAH DENGAN TEKS YNF & YNF CELL SANGAT JELAS
     const YNF_EMBLEM_LOGO = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
             <defs>
-                <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#fff2aa" />
+                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fff3b0" />
                     <stop offset="50%" stop-color="#ffd700" />
                     <stop offset="100%" stop-color="#996515" />
                 </linearGradient>
             </defs>
             <rect width="400" height="400" fill="#030305"/>
-            <!-- Lingkaran Luar & Dalam Emblem -->
-            <circle cx="200" cy="200" r="175" fill="none" stroke="url(#gold)" stroke-width="8"/>
-            <circle cx="200" cy="200" r="158" fill="none" stroke="url(#gold)" stroke-width="2" opacity="0.6"/>
+            <!-- Bingkai Lingkaran Ganda Emblem Emas -->
+            <circle cx="200" cy="200" r="176" fill="none" stroke="url(#goldGrad)" stroke-width="8"/>
+            <circle cx="200" cy="200" r="158" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6"/>
             
             <!-- Simbol HP & Sinyal Mewah di Atas -->
-            <path d="M 165 75 Q 200 55 235 75" fill="none" stroke="url(#gold)" stroke-width="4.5" stroke-linecap="round"/>
-            <rect x="182" y="84" width="36" height="54" rx="6" fill="none" stroke="url(#gold)" stroke-width="3.5"/>
-            <circle cx="200" cy="128" r="2.5" fill="url(#gold)"/>
+            <path d="M 165 75 Q 200 55 235 75" fill="none" stroke="url(#goldGrad)" stroke-width="4.5" stroke-linecap="round"/>
+            <rect x="182" y="84" width="36" height="54" rx="6" fill="none" stroke="url(#goldGrad)" stroke-width="3.5"/>
+            <circle cx="200" cy="128" r="2.5" fill="url(#goldGrad)"/>
 
-            <!-- Tulisan YNF Besar di Tengah -->
-            <text x="200" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="88" fill="url(#gold)" letter-spacing="4" text-anchor="middle">YNF</text>
+            <!-- Tulisan Utama YNF Besar & Tebal -->
+            <text x="200" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="88" fill="url(#goldGrad)" letter-spacing="4" text-anchor="middle">YNF</text>
             
-            <!-- Tulisan YNF CELL di Bagian Bawah Lingkaran -->
+            <!-- Tulisan YNF CELL Jelas di Bawah -->
             <text x="200" y="295" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#f0f0f5" letter-spacing="12" text-anchor="middle">YNF CELL</text>
         </svg>
     `;
 
-    document.getElementById('loginLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
-    document.getElementById('topLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
-    document.getElementById('notaLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
+    function pasangLogo() {
+        const elLogin = document.getElementById('loginLogoContainer');
+        const elTop = document.getElementById('topLogoContainer');
+        const elNota = document.getElementById('notaLogoContainer');
+
+        if (elLogin) elLogin.innerHTML = YNF_EMBLEM_LOGO;
+        if (elTop) elTop.innerHTML = YNF_EMBLEM_LOGO;
+        if (elNota) elNota.innerHTML = YNF_EMBLEM_LOGO;
+    }
 
     let rekapDataList = [];
     let myChart = null;
 
     window.addEventListener('DOMContentLoaded', () => {
+        pasangLogo();
+
         if (localStorage.getItem('ynf_is_logged') === 'true') {
             document.getElementById('pageLogin').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
@@ -453,6 +462,7 @@
             document.getElementById('filterMulai').value = firstDay;
             document.getElementById('filterSelesai').value = today;
 
+            pasangLogo();
             loadRekapLocal();
         }
     });
@@ -473,6 +483,7 @@
         document.getElementById('bottomNav').style.display = 'none';
         document.getElementById('pageLogin').style.display = 'flex';
         document.getElementById('pinInput').value = '';
+        pasangLogo();
     }
 
     function cariPelangganOtomatis(nomor) {
@@ -540,6 +551,7 @@
             document.getElementById('filterMulai').value = firstDay;
             document.getElementById('filterSelesai').value = today;
 
+            pasangLogo();
             showAlert('✅ Login Berhasil!', true);
             loadRekapLocal();
         } else {
@@ -563,6 +575,7 @@
             document.getElementById('pageTransaksi').style.display = 'block';
             document.getElementById('navTrx').classList.add('active');
         }
+        pasangLogo();
     }
 
     function showAlert(text, isSuccess) {
@@ -860,6 +873,7 @@
             statusBox.innerText = '✅ LUNAS'; statusBox.className = 'n-status-text n-status-lunas';
             rowJt.style.display = 'none';
         }
+        pasangLogo();
     }
 
     function tampilkanNotaDariRekap(index) {
