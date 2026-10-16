@@ -587,7 +587,6 @@
                 list = data.results;
             }
             
-            // Penyortiran ganda: Tanggal terbaru di atas, jika sama urutkan ID terbesar
             list.sort((a, b) => {
                 if (b.tanggal !== a.tanggal) {
                     return new Date(b.tanggal) - new Date(a.tanggal);
@@ -671,6 +670,73 @@
         reader.readAsArrayBuffer(file);
     }
 
+    async function backupDataJSON() {
+        try {
+            const transaksiList = await ambilSemuaTransaksi();
+            if (!transaksiList || transaksiList.length === 0) {
+                return showAlert('❌ Tidak ada data untuk dibackup', false);
+            }
+
+            const dataBackup = {
+                version: "1.0",
+                tanggal_backup: new Date().toISOString(),
+                total_data: transaksiList.length,
+                transactions: transaksiList,
+                customers: JSON.parse(localStorage.getItem('ynf_customers') || '{}')
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataBackup, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Backup-PPOB-YNF-${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showAlert('✅ Berhasil mencadangkan data ke file JSON!', true);
+        } catch (err) {
+            showAlert('❌ Gagal melakukan backup: ' + err.message, false);
+        }
+    }
+
+    async function restoreDataJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                let listData = [];
+
+                if (Array.isArray(parsed)) {
+                    listData = parsed;
+                } else if (parsed && Array.isArray(parsed.transactions)) {
+                    listData = parsed.transactions;
+                    if (parsed.customers) {
+                        localStorage.setItem('ynf_customers', JSON.stringify(parsed.customers));
+                    }
+                }
+
+                if (listData.length === 0) {
+                    return showAlert('❌ File backup kosong atau format tidak valid.', false);
+                }
+
+                let count = 0;
+                for (let item of listData) {
+                    await simpanKeCloud(item);
+                    count++;
+                }
+
+                loadRekapLocal();
+                showAlert(`✅ Berhasil memulihkan ${count} data transaksi!`, true);
+            } catch (err) {
+                showAlert('❌ Gagal membaca file JSON: ' + err.message, false);
+            }
+        };
+        reader.readAsText(file);
+    }
+
     async function loadRekapLocal() {
         const transaksiList = await ambilSemuaTransaksi();
         const mulai = document.getElementById('filterMulai').value;
@@ -686,7 +752,6 @@
             return matchStatus && matchDate;
         });
 
-        // Urutkan ulang agar data terbaru selalu di posisi paling atas tabel
         filtered.sort((a, b) => {
             if (b.tanggal !== a.tanggal) {
                 return new Date(b.tanggal) - new Date(a.tanggal);
