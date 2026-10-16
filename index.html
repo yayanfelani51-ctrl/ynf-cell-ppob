@@ -51,12 +51,11 @@
             border-radius: 32px; padding: 40px 28px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85); text-align: center;
         }
         .login-avatar {
-            width: 76px; height: 76px; margin: 0 auto 18px auto;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.22), rgba(255, 215, 0, 0.02));
-            border: 1.5px solid var(--accent-gold); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 32px;
-            box-shadow: 0 0 25px rgba(229, 178, 40, 0.3);
+            width: 82px; height: 82px; margin: 0 auto 18px auto;
+            border-radius: 50%; overflow: hidden; border: 2px solid var(--accent-gold);
+            box-shadow: 0 0 25px rgba(229, 178, 40, 0.35); background: #000; display: flex; align-items: center; justify-content: center;
         }
+        
         .login-brand-title {
             font-size: 26px; font-weight: 900;
             background: linear-gradient(180deg, #ffffff 20%, var(--accent-gold) 100%);
@@ -84,7 +83,7 @@
         }
         .top-dash-header { display: flex; justify-content: space-between; align-items: center; }
         .top-dash-brand { display: flex; align-items: center; gap: 14px; }
-        .top-dash-logo { width: 60px; height: 34px; filter: drop-shadow(0 0 12px rgba(229,178,40,0.4)); }
+        .top-dash-logo { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); box-shadow: 0 0 12px rgba(229,178,40,0.4); display: flex; align-items: center; justify-content: center; background: #000; }
         .top-dash-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); }
         .top-dash-sub { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; }
         
@@ -161,7 +160,7 @@
             background: #030305; color: #ffffff; width: 330px; padding: 30px 26px; border-radius: 28px;
             border: 1.5px solid var(--accent-glow); box-shadow: 0 0 45px rgba(229, 178, 40, 0.25);
         }
-        .n-logo-box { width: 180px; height: 90px; margin: 0 auto 8px auto; display: flex; align-items: center; justify-content: center; }
+        .n-logo-box { width: 75px; height: 75px; margin: 0 auto 10px auto; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--accent-gold); display: flex; align-items: center; justify-content: center; background: #000; }
         .n-title-box { margin-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 14px; text-align: center; }
         .n-brand { font-size: 22px; font-weight: 900; color: var(--accent-gold); letter-spacing: 1.5px; }
         .n-subtitle { font-size: 9px; color: var(--text-secondary); letter-spacing: 3px; }
@@ -197,7 +196,7 @@
     <!-- HALAMAN LOGIN -->
     <div id="pageLogin">
         <div class="login-card">
-            <div class="login-avatar">🔑</div>
+            <div class="login-avatar" id="loginLogoContainer"></div>
             <div class="login-brand-title">YNF CELL</div>
             <div class="login-sub-title">Autentikasi Akses</div>
             
@@ -222,7 +221,7 @@
         <div class="top-dash">
             <div class="top-dash-header">
                 <div class="top-dash-brand">
-                    <div class="top-dash-logo" id="topLogo"></div>
+                    <div class="top-dash-logo" id="topLogoContainer"></div>
                     <div>
                         <div class="top-dash-title">YNF CELL</div>
                         <div class="top-dash-sub">PPOB Center</div>
@@ -311,7 +310,7 @@
                 <div class="card-title">📄 Struk Digital Transaksi</div>
                 <div id="notaContainer">
                     <div id="notaPreview">
-                        <div class="n-logo-box" id="notaLogo"></div>
+                        <div class="n-logo-box" id="notaLogoContainer"></div>
                         <div class="n-title-box"><div class="n-brand">YNF CELL</div><div class="n-subtitle">PPOB CENTER</div></div>
 
                         <div class="n-row"><div class="n-label">No. Trx</div><div class="n-val" id="n_trx">-</div></div>
@@ -408,30 +407,31 @@
 <script>
     const API_URL = "https://sel-ynf-ppob.yayanfelani51.workers.dev/api/transaksi";
 
-    const YNF_SVG_LOGO = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 250" width="100%" height="100%">
+    // LOGO EMBLEM LINGKARAN EMAS MEWAH (YNF CELL)
+    const YNF_EMBLEM_LOGO = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
             <defs>
-                <linearGradient id="luxuryGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffffff" />
-                    <stop offset="40%" stop-color="#ffd700" />
-                    <stop offset="100%" stop-color="#aa771c" />
+                <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fff2aa" />
+                    <stop offset="50%" stop-color="#ffd700" />
+                    <stop offset="100%" stop-color="#996515" />
                 </linearGradient>
-                <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="4" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
             </defs>
-            <rect x="180" y="45" width="140" height="90" rx="16" fill="none" stroke="url(#luxuryGold)" stroke-width="1.8" opacity="0.3" />
-            <path d="M 220 70 L 250 100 L 280 70" fill="none" stroke="url(#luxuryGold)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)" />
-            <line x1="250" y1="58" x2="250" y2="105" stroke="url(#luxuryGold)" stroke-width="4.5" stroke-linecap="round" filter="url(#softGlow)" />
-            <circle cx="250" cy="118" r="3" fill="#ffd700" />
-            <text x="250" y="172" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="44" fill="url(#luxuryGold)" letter-spacing="9" text-anchor="middle" filter="url(#softGlow)">YNF</text>
-            <text x="250" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#888892" letter-spacing="12" text-anchor="middle">CELL PPOB</text>
+            <rect width="300" height="300" fill="#030305"/>
+            <circle cx="150" cy="150" r="135" fill="none" stroke="url(#gold)" stroke-width="6"/>
+            <circle cx="150" cy="150" r="122" fill="none" stroke="url(#gold)" stroke-width="1.5" opacity="0.5"/>
+            <!-- Simbol HP & Sinyal Minimalis di atas YNF -->
+            <path d="M 130 85 Q 150 70 170 85" fill="none" stroke="url(#gold)" stroke-width="3.5" stroke-linecap="round"/>
+            <rect x="138" y="92" width="24" height="38" rx="4" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+            <!-- Huruf YNF Artistic -->
+            <text x="150" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="76" fill="url(#gold)" letter-spacing="2" text-anchor="middle">YNF</text>
+            <text x="150" y="238" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="#d0d0d8" letter-spacing="8" text-anchor="middle">YNF CELL</text>
         </svg>
     `;
 
-    document.getElementById('topLogo').innerHTML = YNF_SVG_LOGO;
-    document.getElementById('notaLogo').innerHTML = YNF_SVG_LOGO;
+    document.getElementById('loginLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
+    document.getElementById('topLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
+    document.getElementById('notaLogoContainer').innerHTML = YNF_EMBLEM_LOGO;
 
     let rekapDataList = [];
     let myChart = null;
