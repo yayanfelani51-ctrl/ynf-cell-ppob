@@ -43,7 +43,7 @@
 
         .container { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* WADAH LOGO EMAS MEWAH */
+        /* LOGO EMAS BERBINGKAI MEWAH */
         .ynf-logo-frame {
             width: 130px; height: 130px; margin: 0 auto 16px auto;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -210,7 +210,7 @@
             <div class="login-brand-title">YNF CELL</div>
             <div class="login-sub-title">Autentikasi Akses</div>
             
-            <form id="loginForm">
+            <form id="loginForm" onsubmit="prosesMasuk(event)">
                 <div class="form-group">
                     <label style="text-align:center;">MASUKKAN PIN ADMIN (Default: 1234)</label>
                     <input type="password" id="pinInput" placeholder="••••" required style="text-align:center; font-size: 24px; letter-spacing: 8px;">
@@ -426,18 +426,34 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('ynf_is_logged') === 'true') {
-            document.getElementById('pageLogin').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('bottomNav').style.display = 'flex';
-            
-            const today = new Date().toISOString().split('T')[0];
-            const firstDay = today.substring(0, 8) + '01';
-            document.getElementById('filterMulai').value = firstDay;
-            document.getElementById('filterSelesai').value = today;
-
-            setTimeout(loadRekapLocal, 200);
+            tampilkanDasborUtama();
         }
     });
+
+    function prosesMasuk(e) {
+        if (e) e.preventDefault();
+        const inputPin = document.getElementById('pinInput').value.trim();
+        if (inputPin === '1234') {
+            localStorage.setItem('ynf_is_logged', 'true');
+            tampilkanDasborUtama();
+        } else {
+            alert('❌ PIN Salah! Gunakan PIN 1234');
+            document.getElementById('pinInput').value = '';
+        }
+    }
+
+    function tampilkanDasborUtama() {
+        document.getElementById('pageLogin').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        document.getElementById('bottomNav').style.display = 'flex';
+        
+        const today = new Date().toISOString().split('T')[0];
+        const firstDay = today.substring(0, 8) + '01';
+        if (document.getElementById('filterMulai')) document.getElementById('filterMulai').value = firstDay;
+        if (document.getElementById('filterSelesai')) document.getElementById('filterSelesai').value = today;
+
+        showAlert('✅ Selamat Datang di YNF CELL!', true);
+    }
 
     function updateDigitalClock() {
         const d = new Date();
@@ -455,6 +471,29 @@
         document.getElementById('bottomNav').style.display = 'none';
         document.getElementById('pageLogin').style.display = 'flex';
         document.getElementById('pinInput').value = '';
+    }
+
+    function logout() { resetToLogin(); showAlert('🔒 Anda telah keluar.', true); }
+
+    function bukaHalaman(hal) {
+        document.getElementById('navTrx').classList.remove('active');
+        document.getElementById('navRekap').classList.remove('active');
+        if (hal === 'rekap') {
+            document.getElementById('pageTransaksi').style.display = 'none';
+            document.getElementById('pageRekap').style.display = 'block';
+            document.getElementById('navRekap').classList.add('active');
+            loadRekapLocal();
+        } else {
+            document.getElementById('pageRekap').style.display = 'none';
+            document.getElementById('pageTransaksi').style.display = 'block';
+            document.getElementById('navTrx').classList.add('active');
+        }
+    }
+
+    function showAlert(text, isSuccess) {
+        const a = document.getElementById('alert');
+        a.innerText = text; a.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+        a.style.display = 'block'; setTimeout(() => { a.style.display = 'none'; }, 4000);
     }
 
     function cariPelangganOtomatis(nomor) {
@@ -508,51 +547,6 @@
 
     let currentLastData = null;
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const pin = document.getElementById('pinInput').value.trim();
-        if (pin === '1234') {
-            localStorage.setItem('ynf_is_logged', 'true');
-            document.getElementById('pageLogin').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('bottomNav').style.display = 'flex';
-            
-            const today = new Date().toISOString().split('T')[0];
-            const firstDay = today.substring(0, 8) + '01';
-            document.getElementById('filterMulai').value = firstDay;
-            document.getElementById('filterSelesai').value = today;
-
-            showAlert('✅ Login Berhasil!', true);
-            setTimeout(loadRekapLocal, 200);
-        } else {
-            showAlert('❌ PIN Salah! (Gunakan 1234)', false);
-            document.getElementById('pinInput').value = '';
-        }
-    });
-
-    function logout() { resetToLogin(); showAlert('🔒 Anda telah keluar.', true); }
-
-    function bukaHalaman(hal) {
-        document.getElementById('navTrx').classList.remove('active');
-        document.getElementById('navRekap').classList.remove('active');
-        if (hal === 'rekap') {
-            document.getElementById('pageTransaksi').style.display = 'none';
-            document.getElementById('pageRekap').style.display = 'block';
-            document.getElementById('navRekap').classList.add('active');
-            loadRekapLocal();
-        } else {
-            document.getElementById('pageRekap').style.display = 'none';
-            document.getElementById('pageTransaksi').style.display = 'block';
-            document.getElementById('navTrx').classList.add('active');
-        }
-    }
-
-    function showAlert(text, isSuccess) {
-        const a = document.getElementById('alert');
-        a.innerText = text; a.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
-        a.style.display = 'block'; setTimeout(() => { a.style.display = 'none'; }, 4000);
-    }
-
     function formatTanggalIndo(tglStr) {
         if(!tglStr) return '-';
         const parts = tglStr.split('-');
@@ -562,7 +556,7 @@
     async function ambilSemuaTransaksi() {
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000); // Batas waktu 3 detik
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
             
             const res = await fetch(API_URL, {
                 method: 'GET',
@@ -653,7 +647,7 @@
                         count++;
                     }
                     loadRekapLocal();
-                    showAlert(`✅ Berhasil mengimpor ${count} transaksi ke Cloudflare!`, true);
+                    showAlert(`✅ Berhasil mengimpor ${count} transaksi!`, true);
                 } else {
                     showAlert('❌ File Excel kosong.', false);
                 }
@@ -723,3 +717,301 @@
                 }
 
                 loadRekapLocal();
+                showAlert(`✅ Berhasil memulihkan ${count} data transaksi!`, true);
+            } catch (err) {
+                showAlert('❌ Gagal membaca file JSON: ' + err.message, false);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    async function loadRekapLocal() {
+        const transaksiList = await ambilSemuaTransaksi();
+        const mulai = document.getElementById('filterMulai').value;
+        const selesai = document.getElementById('filterSelesai').value;
+        const status = document.getElementById('filterStatus').value;
+
+        let filtered = transaksiList.filter(t => {
+            let matchStatus = (status === 'SEMUA' || t.status_pembayaran === status);
+            let matchDate = true;
+            if (mulai && selesai) {
+                matchDate = (t.tanggal >= mulai && t.tanggal <= selesai);
+            }
+            return matchStatus && matchDate;
+        });
+
+        filtered.sort((a, b) => {
+            if (b.tanggal !== a.tanggal) {
+                return new Date(b.tanggal) - new Date(a.tanggal);
+            }
+            return Number(b.id) - Number(a.id);
+        });
+
+        rekapDataList = filtered;
+
+        let totalOmset = 0, totalLunas = 0, totalHutang = 0;
+        filtered.forEach(t => {
+            const h = Number(t.harga) || 0;
+            totalOmset += h;
+            if (t.status_pembayaran === 'LUNAS') totalLunas += h;
+            else totalHutang += h;
+        });
+
+        document.getElementById('sumOmset').innerText = 'Rp ' + totalOmset.toLocaleString('id-ID');
+        document.getElementById('sumLunas').innerText = 'Rp ' + totalLunas.toLocaleString('id-ID');
+        document.getElementById('sumHutang').innerText = 'Rp ' + totalHutang.toLocaleString('id-ID');
+        renderSalesChart(filtered);
+
+        const tbody = document.getElementById('rekapTableBody');
+        if (filtered.length > 0) {
+            tbody.innerHTML = filtered.map((item, idx) => `
+                <tr>
+                    <td><small>${item.no_transaksi}</small></td>
+                    <td>${item.tanggal}</td>
+                    <td><b>${item.nama}</b><br><small style="color:var(--text-secondary)">${item.nomor}</small></td>
+                    <td>Rp ${Number(item.harga).toLocaleString('id-ID')}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-nota" onclick="tampilkanNotaDariRekap(${idx})">📄 Struk</button>
+                            <button class="${item.status_pembayaran === 'LUNAS' ? 'badge-lunas' : 'badge-hutang'}" onclick="ubahStatusLokal(${item.id})">${item.status_pembayaran}</button>
+                            <button class="btn-del" onclick="hapusTransaksiLokal(${item.id})">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">Tidak ada data transaksi.</td></tr>';
+        }
+    }
+
+    function renderSalesChart(transactions) {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        let dateMap = {};
+        transactions.forEach(t => { dateMap[t.tanggal] = (dateMap[t.tanggal] || 0) + Number(t.harga); });
+        const labels = Object.keys(dateMap).sort();
+        const totals = labels.map(date => dateMap[date]);
+
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels.length > 0 ? labels : ['Hari Ini'],
+                datasets: [{ label: 'Omset (Rp)', data: totals.length > 0 ? totals : [0], borderColor: '#ffd700', backgroundColor: 'rgba(255, 215, 0, 0.1)', borderWidth: 3, fill: true, tension: 0.3 }]
+            },
+            options: { responsive: true, plugins: { legend: { labels: { color: '#ffffff', font: { size: 10 } } } } }
+        });
+    }
+
+    function eksporKeExcel() {
+        if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data untuk diekspor', false);
+        const excelData = rekapDataList.map((item, index) => ({
+            No: index + 1, 'No Transaksi': item.no_transaksi, Tanggal: item.tanggal, Pelanggan: item.nama,
+            'No HP / ID': item.nomor, 'Asal PDAM': item.asal_pdam || '-', Produk: item.produk, Paket: item.paket || '-',
+            'Harga Jual': item.harga, Status: item.status_pembayaran, 'Jatuh Tempo': item.jatuh_tempo || '-'
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan YNF");
+        XLSX.writeFile(workbook, `Laporan-PPOB-YNF-${new Date().toISOString().split('T')[0]}.xlsx`);
+        showAlert('✅ Berhasil diunduh ke Excel!', true);
+    }
+
+    function renderNotaView(item) {
+        document.getElementById('n_trx').innerText = item.no_transaksi;
+        document.getElementById('n_tgl').innerText = formatTanggalIndo(item.tanggal);
+        document.getElementById('n_produk').innerText = item.produk || '-';
+        document.getElementById('n_nama').innerText = item.nama;
+        document.getElementById('n_nomor').innerText = item.nomor;
+        document.getElementById('n_harga').innerText = 'Rp ' + Number(item.harga).toLocaleString('id-ID');
+
+        const rowAsal = document.getElementById('n_row_asal');
+        if (item.produk === 'Tagihan PDAM' && item.asal_pdam) {
+            document.getElementById('n_asal').innerText = item.asal_pdam;
+            rowAsal.style.display = 'flex';
+        } else {
+            rowAsal.style.display = 'none';
+        }
+
+        const statusBox = document.getElementById('n_status_box');
+        const rowJt = document.getElementById('n_row_jt');
+        if (item.status_pembayaran === 'HUTANG') {
+            statusBox.innerText = '⚠️ HUTANG'; statusBox.className = 'n-status-text n-status-hutang';
+            if(item.jatuh_tempo) { document.getElementById('n_jt').innerText = formatTanggalIndo(item.jatuh_tempo); rowJt.style.display = 'flex'; }
+            else { rowJt.style.display = 'none'; }
+        } else {
+            statusBox.innerText = '✅ LUNAS'; statusBox.className = 'n-status-text n-status-lunas';
+            rowJt.style.display = 'none';
+        }
+    }
+
+    function tampilkanNotaDariRekap(index) {
+        const item = rekapDataList[index];
+        if (!item) return;
+        currentLastData = { ...item };
+        renderNotaView(item);
+        bukaHalaman('transaksi');
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('notaCard').style.display = 'block';
+        document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function ubahStatusLokal(id) {
+        let transaksiList = await ambilSemuaTransaksi();
+        let target = transaksiList.find(t => t.id === id);
+        if (!target) return showAlert('❌ Transaksi tidak ditemukan', false);
+
+        target.status_pembayaran = target.status_pembayaran === 'LUNAS' ? 'HUTANG' : 'LUNAS';
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(target)
+            });
+            if (!res.ok) throw new Error("Gagal memperbarui status di server");
+
+            showAlert(`✅ Status diubah menjadi ${target.status_pembayaran}!`, true);
+            loadRekapLocal();
+        } catch (err) {
+            showAlert('❌ Gagal mengubah status: ' + err.message, false);
+        }
+    }
+
+    async function hapusTransaksiLokal(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            
+            if (!res.ok) throw new Error("Gagal menghapus dari server");
+
+            showAlert('🗑️ Transaksi berhasil dihapus!', true);
+            loadRekapLocal();
+        } catch (err) {
+            showAlert('❌ Gagal menghapus transaksi: ' + err.message, false);
+        }
+    }
+
+    document.getElementById('txForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSimpan');
+        btn.disabled = true; btn.innerText = 'Menyimpan...';
+
+        const produkVal = document.getElementById('produk').value;
+        let newTrx = {};
+
+        if (produkVal === 'Tagihan PDAM') {
+            const namaVal = document.getElementById('pdam_nama').value;
+            const nomorVal = document.getElementById('pdam_nomor').value;
+            simpanPelangganKeLokal(nomorVal, namaVal);
+
+            newTrx = {
+                id: Date.now(),
+                no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
+                tanggal: document.getElementById('pdam_tanggal').value,
+                jatuh_tempo: document.getElementById('pdam_jatuh_tempo').value,
+                nama: namaVal,
+                nomor: nomorVal,
+                asal_pdam: document.getElementById('pdam_asal').value,
+                produk: 'Tagihan PDAM',
+                paket: 'Tagihan Air',
+                harga_modal: Number(document.getElementById('pdam_modal').value || 0),
+                harga: Number(document.getElementById('pdam_jual').value || 0),
+                status_pembayaran: document.getElementById('pdam_status').value
+            };
+        } else {
+            const namaVal = document.getElementById('nama').value;
+            const nomorVal = document.getElementById('nomor').value;
+            simpanPelangganKeLokal(nomorVal, namaVal);
+
+            newTrx = {
+                id: Date.now(),
+                no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
+                tanggal: document.getElementById('tanggal').value,
+                jatuh_tempo: document.getElementById('jatuh_tempo').value,
+                nama: namaVal,
+                nomor: nomorVal,
+                produk: produkVal,
+                paket: document.getElementById('paket').value,
+                harga_modal: Number(document.getElementById('harga_modal').value || 0),
+                harga: Number(document.getElementById('harga').value || 0),
+                status_pembayaran: document.getElementById('status_pembayaran').value
+            };
+        }
+
+        try {
+            await simpanKeCloud(newTrx);
+            showAlert('✅ Berhasil Disimpan ke Cloud!', true);
+            currentLastData = newTrx;
+            renderNotaView(currentLastData);
+            document.getElementById('formCard').style.display = 'none';
+            document.getElementById('notaCard').style.display = 'block';
+            document.getElementById('notaCard').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('txForm').reset();
+            document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
+        } catch(err) {
+            showAlert('❌ Gagal menyimpan ke server', false);
+        }
+        
+        btn.disabled = false; 
+        btn.innerText = '💾 Simpan & Cetak Struk';
+    });
+
+    function downloadNotaPNG() {
+        html2canvas(document.getElementById('notaPreview'), { 
+            backgroundColor: '#030305', 
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Nota-' + (currentLastData ? currentLastData.no_transaksi : 'YNF') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function kirimNotaWA() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        let rawNo = String(currentLastData.nomor || '').replace(/[^0-9]/g, '');
+        let noHp = rawNo.startsWith('0') ? '62' + rawNo.substring(1) : '62' + rawNo;
+
+        let teks = `*YNF CELL PPOB*\n` +
+                   `No Trx: ${currentLastData.no_transaksi}\n` +
+                   `Tanggal: ${formatTanggalIndo(currentLastData.tanggal)}\n` +
+                   `--------------------------------\n` +
+                   `Produk: ${currentLastData.produk}\n` +
+                   `Nama: ${currentLastData.nama}\n` +
+                   `ID Pelanggan: ${currentLastData.nomor}\n`;
+
+        if (currentLastData.asal_pdam) {
+            teks += `Asal PDAM: ${currentLastData.asal_pdam}\n`;
+        }
+
+        teks += `Jumlah Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
+    }
+
+    async function cetakPrinterBluetooth() {
+        if (!currentLastData) return showAlert('❌ Tidak ada data', false);
+        if (!navigator.bluetooth) return alert('Browser tidak mendukung Bluetooth.');
+        try {
+            const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] });
+            const server = await device.gatt.connect();
+            const service = await server.primaryService;
+            const characteristic = await service.characteristic;
+            let data = `YNF CELL\nNo: ${currentLastData.no_transaksi}\nNama: ${currentLastData.nama}\nTagihan: Rp ${currentLastData.harga}\n`;
+            await characteristic.writeValue(new TextEncoder().encode(data));
+            showAlert('✅ Tercetak!', true);
+        } catch (err) { showAlert('❌ Gagal cetak', false); }
+    }
+</script>
+
+</body>
+</html>
