@@ -136,6 +136,17 @@
         }
         input:focus, select:focus { outline: none; border-color: var(--accent-gold); background: rgba(0,0,0,0.85); }
 
+        /* INPUT KHUSUS NO TOKEN AGAR BESAR DAN JELAS */
+        input.input-token-besar {
+            font-size: 20px;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            font-weight: 900;
+            text-align: center;
+            background: rgba(229, 178, 40, 0.08);
+            border: 1.5px dashed var(--accent-gold);
+        }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         button { 
@@ -177,6 +188,19 @@
         .n-label { color: var(--text-secondary); width: 40%; font-weight: 700; }
         .n-val { color: #ffffff; font-weight: 900; text-align: right; width: 60%; }
         .n-val-gold { color: var(--accent-gold); font-weight: 900; text-align: right; }
+        
+        /* TAMPILAN NO TOKEN PADA NOTA AGAR MENCOLOK */
+        .n-token-box {
+            background: rgba(229, 178, 40, 0.12);
+            border: 1px solid var(--accent-gold);
+            padding: 10px;
+            border-radius: 14px;
+            text-align: center;
+            margin: 12px 0;
+        }
+        .n-token-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
+        .n-token-val { font-size: 18px; font-weight: 900; color: var(--accent-gold); letter-spacing: 2px; margin-top: 4px; font-family: monospace; }
+
         .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.18); margin: 16px 0; }
         .n-status-box { text-align: center; margin: 18px 0; }
         .n-status-text { font-size: 19px; font-weight: 900; letter-spacing: 2.5px; }
@@ -290,6 +314,38 @@
                         </div>
                     </div>
 
+                    <!-- CONTAINER KHUSUS TOKEN LISTRIK (SESUAI PERMINTAAN) -->
+                    <div id="formTokenPln" style="display:none;">
+                        <input type="hidden" id="pln_tanggal_hidden">
+                        <div class="grid-2">
+                            <div class="form-group"><label>1. Tanggal Transaksi</label><input type="date" id="pln_tanggal"></div>
+                            <div class="form-group"><label>3. Tanggal Jatuh Tempo</label><input type="date" id="pln_jatuh_tempo"></div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>2. Nama Pelanggan</label><input type="text" id="pln_nama" placeholder="Nama Pelanggan"></div>
+                            <div class="form-group"><label>4. ID Meteran</label><input type="text" id="pln_id_meteran" placeholder="No Meteran / ID" oninput="cariPelangganPlnOtomatis(this.value)"></div>
+                        </div>
+                        
+                        <!-- 5. NO TOKEN (Dibuat Khusus & Font Besar) -->
+                        <div class="form-group" style="background: rgba(255,215,0,0.04); padding: 14px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2);">
+                            <label style="color:var(--accent-gold); font-size: 11px;">5. No Token Listrik (20 Digit)</label>
+                            <input type="text" id="pln_no_token" class="input-token-besar" placeholder="XXXX XXXX XXXX XXXX XXXX" maxlength="25">
+                        </div>
+
+                        <div class="form-group"><label>6. Nominal Token</label><input type="text" id="pln_nominal" placeholder="Contoh: 100.000"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>7. Harga Modal (Rp)</label><input type="number" id="pln_modal" placeholder="Contoh: 99500"></div>
+                            <div class="form-group"><label>8. Harga Jual (Rp)</label><input type="number" id="pln_jual" placeholder="Contoh: 102000"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>9. Status Lunas & Hutang</label>
+                            <select id="pln_status">
+                                <option value="LUNAS">✅ LUNAS</option>
+                                <option value="HUTANG">⚠️ HUTANG</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- CONTAINER KHUSUS TAGIHAN AIR / PDAM -->
                     <div id="formPdam" style="display:none;">
                         <input type="hidden" id="pdam_tanggal">
@@ -333,6 +389,14 @@
                         <div class="n-row"><div class="n-label">Produk</div><div class="n-val" id="n_produk">-</div></div>
                         <div class="n-row"><div class="n-label">Pelanggan</div><div class="n-val" id="n_nama">-</div></div>
                         <div class="n-row"><div class="n-label">ID Pelanggan</div><div class="n-val" id="n_nomor">-</div></div>
+                        
+                        <!-- KOTAK KHUSUS NO TOKEN DI NOTA -->
+                        <div id="n_box_token" style="display:none;" class="n-token-box">
+                            <div class="n-token-label">Nomor Token Listrik</div>
+                            <div class="n-token-val" id="n_token_val">-</div>
+                        </div>
+
+                        <div class="n-row" id="n_row_nominal" style="display:none;"><div class="n-label">Nominal Token</div><div class="n-val" id="n_nominal_val">-</div></div>
                         <div class="n-row" id="n_row_asal" style="display:none;"><div class="n-label">Asal PDAM</div><div class="n-val" id="n_asal">-</div></div>
                         <div class="n-row"><div class="n-label">Total / Tagihan</div><div class="n-val" id="n_harga">Rp 0</div></div>
                         <div class="n-row" id="n_row_jt" style="display:none;"><div class="n-label">Jatuh Tempo</div><div class="n-val-gold" id="n_jt">-</div></div>
@@ -502,6 +566,12 @@
         if (savedCustomers[nomor]) document.getElementById('nama').value = savedCustomers[nomor];
     }
 
+    function cariPelangganPlnOtomatis(nomor) {
+        if (nomor.length < 4) return;
+        let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
+        if (savedCustomers[nomor]) document.getElementById('pln_nama').value = savedCustomers[nomor];
+    }
+
     function simpanPelangganKeLokal(nomor, nama) {
         if (!nomor || !nama) return;
         let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
@@ -524,6 +594,7 @@
         document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
 
         const formUmum = document.getElementById('formUmum');
+        const formTokenPln = document.getElementById('formTokenPln');
         const formPdam = document.getElementById('formPdam');
         
         const now = new Date();
@@ -532,13 +603,21 @@
         const day = String(now.getDate()).padStart(2, '0');
         const todayStr = `${year}-${month}-${day}`;
 
-        if (val === 'Tagihan PDAM') {
+        if (val === 'Token PLN') {
             formUmum.style.display = 'none';
+            formTokenPln.style.display = 'block';
+            formPdam.style.display = 'none';
+            document.getElementById('pln_tanggal').value = todayStr;
+            document.getElementById('pln_jatuh_tempo').value = todayStr;
+        } else if (val === 'Tagihan PDAM') {
+            formUmum.style.display = 'none';
+            formTokenPln.style.display = 'none';
             formPdam.style.display = 'block';
             document.getElementById('pdam_tanggal').value = todayStr;
             document.getElementById('pdam_jatuh_tempo').value = todayStr;
         } else {
             formUmum.style.display = 'block';
+            formTokenPln.style.display = 'none';
             formPdam.style.display = 'none';
             document.getElementById('tanggal').value = todayStr;
             document.getElementById('jatuh_tempo').value = todayStr;
@@ -635,6 +714,8 @@
                             tanggal: row['Tanggal'] || new Date().toISOString().split('T')[0],
                             nama: row['Pelanggan'] || 'Pelanggan',
                             nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
+                            no_token: row['No Token'] || '',
+                            nominal_token: row['Nominal Token'] || '',
                             produk: row['Produk'] || 'Pulsa',
                             paket: row['Paket'] || '-',
                             asal_pdam: row['Asal PDAM'] || '',
@@ -806,7 +887,7 @@
         if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data untuk diekspor', false);
         const excelData = rekapDataList.map((item, index) => ({
             No: index + 1, 'No Transaksi': item.no_transaksi, Tanggal: item.tanggal, Pelanggan: item.nama,
-            'No HP / ID': item.nomor, 'Asal PDAM': item.asal_pdam || '-', Produk: item.produk, Paket: item.paket || '-',
+            'No HP / ID': item.nomor, 'No Token': item.no_token || '-', 'Nominal Token': item.nominal_token || '-', 'Asal PDAM': item.asal_pdam || '-', Produk: item.produk, Paket: item.paket || '-',
             'Harga Jual': item.harga, Status: item.status_pembayaran, 'Jatuh Tempo': item.jatuh_tempo || '-'
         }));
         const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -824,23 +905,43 @@
         document.getElementById('n_nomor').innerText = item.nomor;
         document.getElementById('n_harga').innerText = 'Rp ' + Number(item.harga).toLocaleString('id-ID');
 
+        const boxToken = document.getElementById('n_box_token');
+        const rowNominal = document.getElementById('n_row_nominal');
         const rowAsal = document.getElementById('n_row_asal');
-        if (item.produk === 'Tagihan PDAM' && item.asal_pdam) {
+        const rowJt = document.getElementById('n_row_jt');
+        const statusBox = document.getElementById('n_status_box');
+
+        // Reset visibilitas elemen opsional nota
+        boxToken.style.display = 'none';
+        rowNominal.style.display = 'none';
+        rowAsal.style.display = 'none';
+        rowJt.style.display = 'none';
+
+        if (item.produk === 'Token PLN') {
+            if (item.no_token) {
+                document.getElementById('n_token_val').innerText = item.no_token;
+                boxToken.style.display = 'block';
+            }
+            if (item.nominal_token) {
+                document.getElementById('n_nominal_val').innerText = item.nominal_token;
+                rowNominal.style.display = 'flex';
+            }
+        } else if (item.produk === 'Tagihan PDAM' && item.asal_pdam) {
             document.getElementById('n_asal').innerText = item.asal_pdam;
             rowAsal.style.display = 'flex';
-        } else {
-            rowAsal.style.display = 'none';
         }
 
-        const statusBox = document.getElementById('n_status_box');
-        const rowJt = document.getElementById('n_row_jt');
+        if (item.jatuh_tempo) {
+            document.getElementById('n_jt').innerText = formatTanggalIndo(item.jatuh_tempo);
+            rowJt.style.display = 'flex';
+        }
+
         if (item.status_pembayaran === 'HUTANG') {
-            statusBox.innerText = '⚠️ HUTANG'; statusBox.className = 'n-status-text n-status-hutang';
-            if(item.jatuh_tempo) { document.getElementById('n_jt').innerText = formatTanggalIndo(item.jatuh_tempo); rowJt.style.display = 'flex'; }
-            else { rowJt.style.display = 'none'; }
+            statusBox.innerText = '⚠️ HUTANG'; 
+            statusBox.className = 'n-status-text n-status-hutang';
         } else {
-            statusBox.innerText = '✅ LUNAS'; statusBox.className = 'n-status-text n-status-lunas';
-            rowJt.style.display = 'none';
+            statusBox.innerText = '✅ LUNAS'; 
+            statusBox.className = 'n-status-text n-status-lunas';
         }
     }
 
@@ -904,7 +1005,27 @@
         const produkVal = document.getElementById('produk').value;
         let newTrx = {};
 
-        if (produkVal === 'Tagihan PDAM') {
+        if (produkVal === 'Token PLN') {
+            const namaVal = document.getElementById('pln_nama').value;
+            const nomorVal = document.getElementById('pln_id_meteran').value;
+            simpanPelangganKeLokal(nomorVal, namaVal);
+
+            newTrx = {
+                id: Date.now(),
+                no_transaksi: 'YNF-' + Math.floor(100000 + Math.random() * 900000),
+                tanggal: document.getElementById('pln_tanggal').value,
+                jatuh_tempo: document.getElementById('pln_jatuh_tempo').value,
+                nama: namaVal,
+                nomor: nomorVal,
+                no_token: document.getElementById('pln_no_token').value,
+                nominal_token: document.getElementById('pln_nominal').value,
+                produk: 'Token PLN',
+                paket: 'Token ' + document.getElementById('pln_nominal').value,
+                harga_modal: Number(document.getElementById('pln_modal').value || 0),
+                harga: Number(document.getElementById('pln_jual').value || 0),
+                status_pembayaran: document.getElementById('pln_status').value
+            };
+        } else if (produkVal === 'Tagihan PDAM') {
             const namaVal = document.getElementById('pdam_nama').value;
             const nomorVal = document.getElementById('pdam_nomor').value;
             simpanPelangganKeLokal(nomorVal, namaVal);
@@ -986,13 +1107,19 @@
                    `--------------------------------\n` +
                    `Produk: ${currentLastData.produk}\n` +
                    `Nama: ${currentLastData.nama}\n` +
-                   `ID Pelanggan: ${currentLastData.nomor}\n`;
+                   `ID Meteran: ${currentLastData.nomor}\n`;
 
+        if (currentLastData.no_token) {
+            teks += `*No Token: ${currentLastData.no_token}*\n`;
+        }
+        if (currentLastData.nominal_token) {
+            teks += `Nominal: ${currentLastData.nominal_token}\n`;
+        }
         if (currentLastData.asal_pdam) {
             teks += `Asal PDAM: ${currentLastData.asal_pdam}\n`;
         }
 
-        teks += `Jumlah Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+        teks += `Total / Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
                 `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
 
         window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
