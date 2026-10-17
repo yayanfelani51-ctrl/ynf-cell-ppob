@@ -435,7 +435,7 @@
             document.getElementById('filterMulai').value = firstDay;
             document.getElementById('filterSelesai').value = today;
 
-            loadRekapLocal();
+            setTimeout(loadRekapLocal, 200);
         }
     });
 
@@ -453,4 +453,273 @@
         localStorage.removeItem('ynf_is_logged');
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('bottomNav').style.display = 'none';
-        document.getElementById('pageLogin').style.display = 'flex
+        document.getElementById('pageLogin').style.display = 'flex';
+        document.getElementById('pinInput').value = '';
+    }
+
+    function cariPelangganOtomatis(nomor) {
+        if (nomor.length < 4) return;
+        let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
+        if (savedCustomers[nomor]) document.getElementById('nama').value = savedCustomers[nomor];
+    }
+
+    function simpanPelangganKeLokal(nomor, nama) {
+        if (!nomor || !nama) return;
+        let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
+        savedCustomers[nomor] = nama;
+        localStorage.setItem('ynf_customers', JSON.stringify(savedCustomers));
+    }
+
+    function syncHargaPdam() {
+        const tagihan = document.getElementById('pdam_tagihan').value;
+        document.getElementById('pdam_jual').value = tagihan;
+    }
+
+    function pilihProduk(val, el) {
+        document.querySelectorAll('.produk-item').forEach(item => item.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('produk').value = val;
+        document.getElementById('formCardTitle').innerText = `📝 Transaksi: ${val}`;
+        document.getElementById('formCard').style.display = 'block';
+        document.getElementById('notaCard').style.display = 'none';
+        document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+
+        const formUmum = document.getElementById('formUmum');
+        const formPdam = document.getElementById('formPdam');
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        if (val === 'Tagihan PDAM') {
+            formUmum.style.display = 'none';
+            formPdam.style.display = 'block';
+            document.getElementById('pdam_tanggal').value = todayStr;
+            document.getElementById('pdam_jatuh_tempo').value = todayStr;
+        } else {
+            formUmum.style.display = 'block';
+            formPdam.style.display = 'none';
+            document.getElementById('tanggal').value = todayStr;
+            document.getElementById('jatuh_tempo').value = todayStr;
+        }
+    }
+
+    let currentLastData = null;
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pin = document.getElementById('pinInput').value.trim();
+        if (pin === '1234') {
+            localStorage.setItem('ynf_is_logged', 'true');
+            document.getElementById('pageLogin').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('bottomNav').style.display = 'flex';
+            
+            const today = new Date().toISOString().split('T')[0];
+            const firstDay = today.substring(0, 8) + '01';
+            document.getElementById('filterMulai').value = firstDay;
+            document.getElementById('filterSelesai').value = today;
+
+            showAlert('✅ Login Berhasil!', true);
+            setTimeout(loadRekapLocal, 200);
+        } else {
+            showAlert('❌ PIN Salah! (Gunakan 1234)', false);
+            document.getElementById('pinInput').value = '';
+        }
+    });
+
+    function logout() { resetToLogin(); showAlert('🔒 Anda telah keluar.', true); }
+
+    function bukaHalaman(hal) {
+        document.getElementById('navTrx').classList.remove('active');
+        document.getElementById('navRekap').classList.remove('active');
+        if (hal === 'rekap') {
+            document.getElementById('pageTransaksi').style.display = 'none';
+            document.getElementById('pageRekap').style.display = 'block';
+            document.getElementById('navRekap').classList.add('active');
+            loadRekapLocal();
+        } else {
+            document.getElementById('pageRekap').style.display = 'none';
+            document.getElementById('pageTransaksi').style.display = 'block';
+            document.getElementById('navTrx').classList.add('active');
+        }
+    }
+
+    function showAlert(text, isSuccess) {
+        const a = document.getElementById('alert');
+        a.innerText = text; a.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+        a.style.display = 'block'; setTimeout(() => { a.style.display = 'none'; }, 4000);
+    }
+
+    function formatTanggalIndo(tglStr) {
+        if(!tglStr) return '-';
+        const parts = tglStr.split('-');
+        return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : tglStr;
+    }
+
+    async function ambilSemuaTransaksi() {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000); // Batas waktu 3 detik
+            
+            const res = await fetch(API_URL, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!res.ok) throw new Error("Gagal ambil dari server");
+            const data = await res.json();
+            
+            let list = [];
+            if (Array.isArray(data)) {
+                list = data;
+            } else if (data && Array.isArray(data.results)) {
+                list = data.results;
+            }
+            
+            list.sort((a, b) => {
+                if (b.tanggal !== a.tanggal) {
+                    return new Date(b.tanggal) - new Date(a.tanggal);
+                }
+                return Number(b.id) - Number(a.id);
+            });
+            
+            localStorage.setItem('ynf_transactions', JSON.stringify(list));
+            return list;
+        } catch (err) {
+            console.warn("Menggunakan cadangan lokal:", err);
+            let localList = JSON.parse(localStorage.getItem('ynf_transactions') || '[]');
+            localList.sort((a, b) => {
+                if (b.tanggal !== a.tanggal) {
+                    return new Date(b.tanggal) - new Date(a.tanggal);
+                }
+                return Number(b.id) - Number(a.id);
+            });
+            return localList;
+        }
+    }
+
+    async function simpanKeCloud(newTrx) {
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTrx)
+            });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Gagal menyimpan ke server");
+            }
+        } catch (err) {
+            console.error("Gagal simpan ke cloud:", err);
+            throw err;
+        }
+    }
+
+    async function imporDariExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                if (json && json.length > 0) {
+                    let count = 0;
+                    for (let [index, row] of json.entries()) {
+                        let item = {
+                            id: Date.now() + index,
+                            no_transaksi: row['No Transaksi'] || row['No Trx'] || `YNF-${Math.floor(100000 + Math.random() * 900000)}`,
+                            tanggal: row['Tanggal'] || new Date().toISOString().split('T')[0],
+                            nama: row['Pelanggan'] || 'Pelanggan',
+                            nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
+                            produk: row['Produk'] || 'Pulsa',
+                            paket: row['Paket'] || '-',
+                            asal_pdam: row['Asal PDAM'] || '',
+                            harga_modal: Number(row['Harga Modal'] || 0),
+                            harga: Number(row['Harga Jual'] || row['Total'] || 0),
+                            status_pembayaran: row['Status'] || 'LUNAS',
+                            jatuh_tempo: row['Jatuh Tempo'] || ''
+                        };
+                        await simpanKeCloud(item);
+                        count++;
+                    }
+                    loadRekapLocal();
+                    showAlert(`✅ Berhasil mengimpor ${count} transaksi ke Cloudflare!`, true);
+                } else {
+                    showAlert('❌ File Excel kosong.', false);
+                }
+            } catch (err) {
+                showAlert('❌ Gagal membaca file Excel: ' + err.message, false);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    async function backupDataJSON() {
+        try {
+            const transaksiList = await ambilSemuaTransaksi();
+            if (!transaksiList || transaksiList.length === 0) {
+                return showAlert('❌ Tidak ada data untuk dibackup', false);
+            }
+
+            const dataBackup = {
+                version: "1.0",
+                tanggal_backup: new Date().toISOString(),
+                total_data: transaksiList.length,
+                transactions: transaksiList,
+                customers: JSON.parse(localStorage.getItem('ynf_customers') || '{}')
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataBackup, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Backup-PPOB-YNF-${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showAlert('✅ Berhasil mencadangkan data ke file JSON!', true);
+        } catch (err) {
+            showAlert('❌ Gagal melakukan backup: ' + err.message, false);
+        }
+    }
+
+    async function restoreDataJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                let listData = [];
+
+                if (Array.isArray(parsed)) {
+                    listData = parsed;
+                } else if (parsed && Array.isArray(parsed.transactions)) {
+                    listData = parsed.transactions;
+                    if (parsed.customers) {
+                        localStorage.setItem('ynf_customers', JSON.stringify(parsed.customers));
+                    }
+                }
+
+                if (listData.length === 0) {
+                    return showAlert('❌ File backup kosong atau format tidak valid.', false);
+                }
+
+                let count = 0;
+                for (let item of listData) {
+                    await simpanKeCloud(item);
+                    count++;
+                }
+
+                loadRekapLocal();
