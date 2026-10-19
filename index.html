@@ -177,7 +177,7 @@
 
         #notaContainer { display: flex; justify-content: center; margin-bottom: 16px; }
         #notaPreview {
-            background: #030305; color: #ffffff; width: 330px; padding: 30px 26px; border-radius: 28px;
+            background: #030305; color: #ffffff; width: 330px; padding: 26px 22px; border-radius: 28px;
             border: 1.5px solid var(--accent-glow); box-shadow: 0 0 45px rgba(229, 178, 40, 0.25);
         }
         .n-title-box { margin-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,0.18); padding-bottom: 14px; text-align: center; }
@@ -201,8 +201,21 @@
         .n-token-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
         .n-token-val { font-size: 18px; font-weight: 900; color: var(--accent-gold); letter-spacing: 2px; margin-top: 4px; font-family: monospace; }
 
+        /* WADAH QRIS DI NOTA */
+        .n-qris-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 12px;
+            margin: 14px 0 8px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .n-qris-title { font-size: 10px; font-weight: 900; color: #030305; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .n-qris-img { width: 100%; max-width: 220px; height: auto; border-radius: 8px; display: block; margin: 0 auto; }
+        .n-qris-sub { font-size: 8px; font-weight: 800; color: #555555; margin-top: 6px; }
+
         .n-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.18); margin: 16px 0; }
-        .n-status-box { text-align: center; margin: 18px 0; }
+        .n-status-box { text-align: center; margin: 14px 0; }
         .n-status-text { font-size: 19px; font-weight: 900; letter-spacing: 2.5px; }
         .n-status-hutang { color: #ff9f0a; }
         .n-status-lunas { color: var(--success); }
@@ -314,9 +327,8 @@
                         </div>
                     </div>
 
-                    <!-- CONTAINER KHUSUS TOKEN LISTRIK (SESUAI PERMINTAAN) -->
+                    <!-- CONTAINER KHUSUS TOKEN LISTRIK -->
                     <div id="formTokenPln" style="display:none;">
-                        <input type="hidden" id="pln_tanggal_hidden">
                         <div class="grid-2">
                             <div class="form-group"><label>1. Tanggal Transaksi</label><input type="date" id="pln_tanggal"></div>
                             <div class="form-group"><label>3. Tanggal Jatuh Tempo</label><input type="date" id="pln_jatuh_tempo"></div>
@@ -326,7 +338,7 @@
                             <div class="form-group"><label>4. ID Meteran</label><input type="text" id="pln_id_meteran" placeholder="No Meteran / ID" oninput="cariPelangganPlnOtomatis(this.value)"></div>
                         </div>
                         
-                        <!-- 5. NO TOKEN (Dibuat Khusus & Font Besar) -->
+                        <!-- NO TOKEN (Dibuat Khusus & Font Besar) -->
                         <div class="form-group" style="background: rgba(255,215,0,0.04); padding: 14px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.2);">
                             <label style="color:var(--accent-gold); font-size: 11px;">5. No Token Listrik (20 Digit)</label>
                             <input type="text" id="pln_no_token" class="input-token-besar" placeholder="XXXX XXXX XXXX XXXX XXXX" maxlength="25">
@@ -348,20 +360,22 @@
 
                     <!-- CONTAINER KHUSUS TAGIHAN AIR / PDAM -->
                     <div id="formPdam" style="display:none;">
-                        <input type="hidden" id="pdam_tanggal">
-                        <div class="form-group"><label>Nama Pelanggan</label><input type="text" id="pdam_nama" placeholder="Nama Pelanggan Air"></div>
                         <div class="grid-2">
-                            <div class="form-group"><label>No ID</label><input type="text" id="pdam_nomor" placeholder="Nomor Sambungan Air"></div>
-                            <div class="form-group"><label>Asal PDAM</label><input type="text" id="pdam_asal" placeholder="Contoh: PDAM Surabaya"></div>
+                            <div class="form-group"><label>1. Tanggal Transaksi</label><input type="date" id="pdam_tanggal"></div>
+                            <div class="form-group"><label>6. Tanggal Jatuh Tempo</label><input type="date" id="pdam_jatuh_tempo"></div>
                         </div>
-                        <div class="form-group"><label>Jumlah Tagihan</label><input type="number" id="pdam_tagihan" placeholder="Contoh: 75000" oninput="syncHargaPdam()"></div>
                         <div class="grid-2">
-                            <div class="form-group"><label>Harga Modal</label><input type="number" id="pdam_modal" placeholder="70000"></div>
-                            <div class="form-group"><label>Harga Jual</label><input type="number" id="pdam_jual" placeholder="75000"></div>
+                            <div class="form-group"><label>2. Nama Pelanggan</label><input type="text" id="pdam_nama" placeholder="Nama Pelanggan Air"></div>
+                            <div class="form-group"><label>3. No ID Pelanggan</label><input type="text" id="pdam_nomor" placeholder="Nomor Sambungan Air" oninput="cariPelangganPdamOtomatis(this.value)"></div>
                         </div>
-                        <div class="form-group"><label>Tanggal Jatuh Tempo</label><input type="date" id="pdam_jatuh_tempo"></div>
+                        <div class="form-group"><label>4. Asal PDAM</label><input type="text" id="pdam_asal" placeholder="Contoh: PDAM Tirta Moedal / PDAM Kota"></div>
+                        <div class="form-group"><label>5. Jumlah Tagihan (Rp)</label><input type="number" id="pdam_tagihan" placeholder="Contoh: 75000" oninput="syncHargaPdam()"></div>
+                        <div class="grid-2">
+                            <div class="form-group"><label>7. Harga Modal (Rp)</label><input type="number" id="pdam_modal" placeholder="Contoh: 72000"></div>
+                            <div class="form-group"><label>8. Harga Jual (Rp)</label><input type="number" id="pdam_jual" placeholder="Contoh: 75000"></div>
+                        </div>
                         <div class="form-group">
-                            <label>Keterangan Lunas atau Hutang</label>
+                            <label>9. Status Lunas atau Hutang</label>
                             <select id="pdam_status">
                                 <option value="LUNAS">✅ LUNAS</option>
                                 <option value="HUTANG">⚠️ HUTANG</option>
@@ -397,13 +411,25 @@
                         </div>
 
                         <div class="n-row" id="n_row_nominal" style="display:none;"><div class="n-label">Nominal Token</div><div class="n-val" id="n_nominal_val">-</div></div>
+                        
+                        <!-- FIELD KHUSUS PDAM DI NOTA -->
                         <div class="n-row" id="n_row_asal" style="display:none;"><div class="n-label">Asal PDAM</div><div class="n-val" id="n_asal">-</div></div>
+                        <div class="n-row" id="n_row_tagihan" style="display:none;"><div class="n-label">Jml Tagihan</div><div class="n-val" id="n_pdam_tagihan">-</div></div>
+
                         <div class="n-row"><div class="n-label">Total / Tagihan</div><div class="n-val" id="n_harga">Rp 0</div></div>
                         <div class="n-row" id="n_row_jt" style="display:none;"><div class="n-label">Jatuh Tempo</div><div class="n-val-gold" id="n_jt">-</div></div>
 
                         <div class="n-divider"></div>
                         <div class="n-status-box"><div class="n-status-text" id="n_status_box">✅ LUNAS</div></div>
                         <div class="n-divider"></div>
+
+                        <!-- KOTAK KHUSUS QRIS PEMBAYARAN DI NOTA -->
+                        <div class="n-qris-box">
+                            <div class="n-qris-title">💳 Scan QRIS Untuk Pembayaran</div>
+                            <img src="qris.png" crossorigin="anonymous" class="n-qris-img" alt="QRIS YNF CELL" onerror="this.src='https://raw.githubusercontent.com/yayanfelani51-ctrl/ynf-cell-ppob/main/qris.png'">
+                            <div class="n-qris-sub">Mendukung Gopay, ShopeePay, BCA, Mandiri, BRI & Bank Lainnya</div>
+                        </div>
+
                         <div class="n-footer">Terima kasih telah bertransaksi<br>di <b>YNF CELL</b></div>
                     </div>
                 </div>
@@ -572,6 +598,12 @@
         if (savedCustomers[nomor]) document.getElementById('pln_nama').value = savedCustomers[nomor];
     }
 
+    function cariPelangganPdamOtomatis(nomor) {
+        if (nomor.length < 4) return;
+        let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
+        if (savedCustomers[nomor]) document.getElementById('pdam_nama').value = savedCustomers[nomor];
+    }
+
     function simpanPelangganKeLokal(nomor, nama) {
         if (!nomor || !nama) return;
         let savedCustomers = JSON.parse(localStorage.getItem('ynf_customers') || '{}');
@@ -716,6 +748,7 @@
                             nomor: String(row['No HP / ID'] || row['Nomor'] || '-'),
                             no_token: row['No Token'] || '',
                             nominal_token: row['Nominal Token'] || '',
+                            jumlah_tagihan_pdam: row['Jumlah Tagihan PDAM'] || '',
                             produk: row['Produk'] || 'Pulsa',
                             paket: row['Paket'] || '-',
                             asal_pdam: row['Asal PDAM'] || '',
@@ -887,7 +920,7 @@
         if (!rekapDataList || rekapDataList.length === 0) return showAlert('❌ Tidak ada data untuk diekspor', false);
         const excelData = rekapDataList.map((item, index) => ({
             No: index + 1, 'No Transaksi': item.no_transaksi, Tanggal: item.tanggal, Pelanggan: item.nama,
-            'No HP / ID': item.nomor, 'No Token': item.no_token || '-', 'Nominal Token': item.nominal_token || '-', 'Asal PDAM': item.asal_pdam || '-', Produk: item.produk, Paket: item.paket || '-',
+            'No HP / ID': item.nomor, 'No Token': item.no_token || '-', 'Nominal Token': item.nominal_token || '-', 'Asal PDAM': item.asal_pdam || '-', 'Jumlah Tagihan PDAM': item.jumlah_tagihan_pdam ? 'Rp ' + Number(item.jumlah_tagihan_pdam).toLocaleString('id-ID') : '-', Produk: item.produk, Paket: item.paket || '-',
             'Harga Jual': item.harga, Status: item.status_pembayaran, 'Jatuh Tempo': item.jatuh_tempo || '-'
         }));
         const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -908,6 +941,7 @@
         const boxToken = document.getElementById('n_box_token');
         const rowNominal = document.getElementById('n_row_nominal');
         const rowAsal = document.getElementById('n_row_asal');
+        const rowTagihan = document.getElementById('n_row_tagihan');
         const rowJt = document.getElementById('n_row_jt');
         const statusBox = document.getElementById('n_status_box');
 
@@ -915,6 +949,7 @@
         boxToken.style.display = 'none';
         rowNominal.style.display = 'none';
         rowAsal.style.display = 'none';
+        rowTagihan.style.display = 'none';
         rowJt.style.display = 'none';
 
         if (item.produk === 'Token PLN') {
@@ -926,9 +961,15 @@
                 document.getElementById('n_nominal_val').innerText = item.nominal_token;
                 rowNominal.style.display = 'flex';
             }
-        } else if (item.produk === 'Tagihan PDAM' && item.asal_pdam) {
-            document.getElementById('n_asal').innerText = item.asal_pdam;
-            rowAsal.style.display = 'flex';
+        } else if (item.produk === 'Tagihan PDAM') {
+            if (item.asal_pdam) {
+                document.getElementById('n_asal').innerText = item.asal_pdam;
+                rowAsal.style.display = 'flex';
+            }
+            if (item.jumlah_tagihan_pdam) {
+                document.getElementById('n_pdam_tagihan').innerText = 'Rp ' + Number(item.jumlah_tagihan_pdam).toLocaleString('id-ID');
+                rowTagihan.style.display = 'flex';
+            }
         }
 
         if (item.jatuh_tempo) {
@@ -1038,6 +1079,7 @@
                 nama: namaVal,
                 nomor: nomorVal,
                 asal_pdam: document.getElementById('pdam_asal').value,
+                jumlah_tagihan_pdam: Number(document.getElementById('pdam_tagihan').value || 0),
                 produk: 'Tagihan PDAM',
                 paket: 'Tagihan Air',
                 harga_modal: Number(document.getElementById('pdam_modal').value || 0),
@@ -1107,7 +1149,7 @@
                    `--------------------------------\n` +
                    `Produk: ${currentLastData.produk}\n` +
                    `Nama: ${currentLastData.nama}\n` +
-                   `ID Meteran: ${currentLastData.nomor}\n`;
+                   `ID Pelanggan: ${currentLastData.nomor}\n`;
 
         if (currentLastData.no_token) {
             teks += `*No Token: ${currentLastData.no_token}*\n`;
@@ -1118,9 +1160,13 @@
         if (currentLastData.asal_pdam) {
             teks += `Asal PDAM: ${currentLastData.asal_pdam}\n`;
         }
+        if (currentLastData.jumlah_tagihan_pdam) {
+            teks += `Jumlah Tagihan Air: Rp ${Number(currentLastData.jumlah_tagihan_pdam).toLocaleString('id-ID')}\n`;
+        }
 
-        teks += `Total / Tagihan: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
-                `Status: *${currentLastData.status_pembayaran}*\n\nTerima Kasih!`;
+        teks += `Total / Bayar: Rp ${Number(currentLastData.harga).toLocaleString('id-ID')}\n` +
+                `Status: *${currentLastData.status_pembayaran}*\n\n` +
+                `*Pembayaran via QRIS YNF CELL*\n(Mendukung Gopay, ShopeePay, BCA, Mandiri, BRI, dll)\n\nTerima Kasih!`;
 
         window.open(`https://api.whatsapp.com/send?phone=${noHp}&text=${encodeURIComponent(teks)}`, '_blank');
     }
